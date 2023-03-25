@@ -1,5 +1,5 @@
 import unittest
-from cards import Stapel, AblageStapel, Farbe, Karte, KartenTyp
+from cards import Stapel, AblageStapel, Farbe, Karte, KartenTyp, AnlageStapel
 
 
 class TestKarte(unittest.TestCase):
@@ -68,6 +68,69 @@ class TestStapel(unittest.TestCase):
         karten.reverse()
         for k in karten:
             self.assertEqual(k, deck.ziehen())
+
+
+class TestAnlageStapel(unittest.TestCase):
+    def test_koenige_koennen_an_leeren_stapel_angelegt_werden(self):
+        erlaubt = [Karte(farbe=f, typ=KartenTyp.KOENIG) for f in list(Farbe)]
+        for k in erlaubt:
+            stapel = AnlageStapel()
+            stapel.anlegen(k)
+
+    def test_nicht_koenige_resultieren_in_value_error_wenn_stapel_leer(self):
+        nicht_erlaubt = [Karte(farbe=f, typ=t) for f in list(
+            Farbe) for t in list(KartenTyp) if t != KartenTyp.KOENIG]
+        for k in nicht_erlaubt:
+            stapel = AnlageStapel() 
+            self.assertRaises(ValueError, lambda: stapel.anlegen(k))
+
+    def test_falsche_farbe_anlegen(self):
+        stapel = AnlageStapel()
+        stapel.anlegen(Karte(farbe=Farbe.KARO, typ=KartenTyp.KOENIG))
+        self.assertRaises(ValueError, lambda: stapel.anlegen(
+            Karte(farbe=Farbe.HERZ, typ=KartenTyp.DAME)))
+
+    def test_anlegen(self):
+        kreuz = self._karten(Farbe.KREUZ)
+        pik = self._karten(Farbe.PIK)
+        herz = self._karten(Farbe.HERZ)
+        karo = self._karten(Farbe.KARO)
+
+        anlageStapel = [AnlageStapel(), AnlageStapel(),
+                        AnlageStapel(), AnlageStapel()]
+        zum_ablegen = [(kreuz[i], herz[i], pik[i], karo[i])
+                       for i in range(0, len(kreuz))]
+        idx = 0
+        for (kr, he, pi, ka) in zum_ablegen:
+            i1 = idx % 4
+            anlageStapel[i1].anlegen(kr)
+            self._assertOrder(anlageStapel[i1])
+            i2 = (idx+1) % 4
+            anlageStapel[i2].anlegen(he)
+            self._assertOrder(anlageStapel[i2])
+            i3 = (idx+2) % 4
+            anlageStapel[i3].anlegen(pi)
+            self._assertOrder(anlageStapel[i3])
+            i4 = (idx+3) % 4
+            anlageStapel[i4].anlegen(ka)
+            self._assertOrder(anlageStapel[i4])
+            idx += 1
+
+    def _assertOrder(self, stapel: AnlageStapel) -> None:
+        prev_farbe = None
+        prev_value = -1
+        for k in stapel.karten:
+            if prev_farbe == None:
+                continue
+            if prev_farbe == k.farbe.farbe:
+                raise AssertionError(
+                    f"Vorherige Farbe {prev_farbe} == aktuelle Farbe {k.farbe.farbe}")
+            if prev_value >= k.typ.value:
+                raise AssertionError(
+                    f"Vorherige wert {prev_value} >= aktuellem wert {k.typ.value}")
+
+    def _karten(self, farbe: Farbe) -> list[Karte]:
+        return [Karte(farbe=farbe, typ=t) for t in reversed(list(KartenTyp))]
 
 
 if __name__ == "__main__":
