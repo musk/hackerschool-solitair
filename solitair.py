@@ -1,10 +1,10 @@
-from cards import Deck, Karte
+from cards import Stapel, Karte
 
 def main():
     '''
     The enty program for the solitair program
     '''
-    deck = Deck()
+    deck = Stapel()
     print(deck)
     print()
     deck.shuffle()

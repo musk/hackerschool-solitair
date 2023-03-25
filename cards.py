@@ -3,10 +3,10 @@ from random import shuffle
 
 
 class Farbe(Enum):
-    PIK = 1
-    KREUZ = 2
-    HERZ = 3
-    KARO = 4
+    KARO = 1
+    HERZ = 2
+    PIK = 3
+    KREUZ = 4
 
 
 class KartenTyp(Enum):
@@ -49,8 +49,31 @@ class Karte(object):
             return self.farbe == other.farbe and self.typ == other.typ
         return False
 
+    def __lt__(self, other) -> bool:
+        if self.farbe == other.farbe:
+            return self.typ.value < other.typ.value
+        return self.farbe.value < other.farbe.value
 
-class Deck(object):
+    def __le__(self, other) -> bool:
+        if self.farbe == other.farbe:
+            return self.typ.value <= other.typ.value
+        return self.farbe.value <= other.farbe.value
+
+    def __gt__(self, other) -> bool:
+        if self.farbe == other.farbe:
+            return self.typ.value > other.typ.value
+        return self.farbe.value > other.farbe.value
+
+    def __ge__(self, other) -> bool:
+        if self.farbe == other.farbe:
+            return self.typ.value >= other.typ.value
+        return self.farbe.value >= other.farbe.value
+
+    def __ne__(self, other) -> bool:
+        return not self.__eq__(other)
+
+
+class Stapel(object):
     def __init__(self) -> None:
         self.karten = [Karte(col, type) for col in list(Farbe)
                        for type in list(KartenTyp)]
@@ -62,6 +85,10 @@ class Deck(object):
         shuffle(self.karten)
         return self
 
+    def ziehen(self) -> Karte:
+        if len(self.karten) > 0:
+            return self.karten.pop()
+        return None
 
 class AblageStapel(object):
     def __init__(self, farbe: Farbe, karten: list[Karte] = []):
@@ -95,3 +122,9 @@ class AblageStapel(object):
             next_idx = self.karten[-1].typ.value
             nextKarte = Karte(farbe=self.farbe, typ=list(KartenTyp)[next_idx])
         return karte == nextKarte
+
+class AnlageStapel(object):
+    def __init__(self, karten: list[Karte] = []) -> None:
+        self.karten = karten
+
+    
