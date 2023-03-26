@@ -44,6 +44,12 @@ class TestKarte(unittest.TestCase):
         self.assertRaises(ValueError, lambda: k.aufdecken())
 
 class TestAblageStapel(unittest.TestCase):
+    def test_nicht_ablegbar(self):
+        ablage = AblageStapel(farbe=Farbe.HERZ)
+        k = Karte(farbe=Farbe.KARO, typ=KartenTyp.AS,visible=True)
+        self.assertFalse(ablage.ablegbar(k))
+        self.assertRaises(ValueError, lambda: ablage.ablegen(k))
+
     def test_ablegen(self):
         for f in list(Farbe):
             karten = [Karte(farbe=f, typ=t) for t in list(KartenTyp)]
