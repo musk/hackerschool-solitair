@@ -34,6 +34,14 @@ class TestKarte(unittest.TestCase):
                     self.assertTrue(k1 != k2)
                     self.assertTrue(k2 != k1)
 
+    def test_turn_card(self):
+        k=Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)
+        k.aufdecken()
+        self.assertTrue(k.aufgedeckt())
+
+    def test_turn_card_throws_value_error(self):
+        k=Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT, visible=True)
+        self.assertRaises(ValueError, lambda: k.aufdecken())
 
 class TestAblageStapel(unittest.TestCase):
     def test_ablegen(self):

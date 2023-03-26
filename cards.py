@@ -42,9 +42,10 @@ class KartenTyp(Enum):
 
 
 class Karte(object):
-    def __init__(self, farbe: Farbe, typ: KartenTyp) -> None:
+    def __init__(self, farbe: Farbe, typ: KartenTyp, visible: bool = False) -> None:
         self.farbe = farbe
         self.typ = typ
+        self.visible = visible
 
     def __repr__(self) -> str:
         return f"Karte({self.farbe},{self.typ})"
@@ -80,6 +81,13 @@ class Karte(object):
     def __ne__(self, other) -> bool:
         return not self.__eq__(other)
 
+    def aufgedeckt(self) -> bool:
+        return self.visible
+    
+    def aufdecken(self):
+        if self.aufgedeckt():
+            raise ValueError(f"Karte {self} ist bereits aufgedeckt!")
+        self.visible = True
 
 class Stapel(object):
     def __init__(self) -> None:
@@ -95,7 +103,9 @@ class Stapel(object):
 
     def ziehen(self) -> Karte:
         if len(self.karten) > 0:
-            return self.karten.pop()
+            k = self.karten.pop()
+            k.aufdecken()
+            return k
         return None
 
 
