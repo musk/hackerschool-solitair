@@ -9,13 +9,14 @@ class Farbe(Enum):
         obj._value_ = value
         return obj
 
-    def __init__(self, farbe):
+    def __init__(self, farbe, blatt: str):
         self.farbe = farbe
+        self.blatt = blatt
 
-    KARO = "rot"
-    HERZ = "rot"
-    PIK = "schwarz"
-    KREUZ = "schwarz"
+    KARO = "rot", "♦️"
+    HERZ = "rot", "♥️"
+    PIK = "schwarz", "♠️"
+    KREUZ = "schwarz", "♣️"
 
 
 class KartenTyp(Enum):
@@ -25,20 +26,121 @@ class KartenTyp(Enum):
         obj._value_ = value
         return obj
 
-    def __init__(self, wert):
+    def __init__(self, wert: int, blatt: str):
         self.wert = wert
-    AS = 1
-    ZWEI = 2
-    DREI = 3
-    VIER = 4
-    FUENF = 5
-    SECHS = 6
-    SIEBEN = 7
-    ACHT = 8
-    NEUN = 9
-    BUBE = 10
-    DAME = 10
-    KOENIG = 10
+        self.blatt = blatt
+
+    def print(self, farbe: Farbe) -> str:
+        return self.blatt.format(farbe.blatt, farbe.blatt)
+
+    AS = 11, """┌───────────┐
+│ A       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       A │
+└───────────┘
+"""
+    ZWEI = 2, """┌───────────┐
+│ 2       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       2 │
+└───────────┘
+"""
+    DREI = 3, """┌───────────┐
+│ 3       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       3 │
+└───────────┘
+"""
+    VIER = 4, """┌───────────┐
+│ 4       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       4 │
+└───────────┘
+"""
+    FUENF = 5, """┌───────────┐
+│ 5       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       5 │
+└───────────┘
+"""
+    SECHS = 6, """┌───────────┐
+│ 6       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       6 │
+└───────────┘
+"""
+    SIEBEN = 7, """┌───────────┐
+│ 7       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       7 │
+└───────────┘
+"""
+    ACHT = 8, """┌───────────┐
+│ 8       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       8 │
+└───────────┘
+"""
+    NEUN = 9, """┌───────────┐
+│ 9       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       9 │
+└───────────┘
+"""
+    BUBE = 10, """┌───────────┐
+│ B       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       B │
+└───────────┘
+"""
+    DAME = 10, """┌───────────┐
+│ D       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       D │
+└───────────┘
+"""
+    KOENIG = 10, """┌───────────┐
+│ K       {} │
+│           │
+│           │
+│           │
+│           │
+│ {}       K │
+└───────────┘
+"""
 
 
 class Karte(object):
@@ -83,11 +185,15 @@ class Karte(object):
 
     def aufgedeckt(self) -> bool:
         return self.visible
-    
+
     def aufdecken(self):
         if self.aufgedeckt():
             raise ValueError(f"Karte {self} ist bereits aufgedeckt!")
         self.visible = True
+
+    def print(self) -> str:
+        return self.typ.print(self.farbe)
+
 
 class Stapel(object):
     def __init__(self) -> None:
@@ -96,6 +202,10 @@ class Stapel(object):
 
     def __str__(self) -> str:
         return ", ".join([str(k) for k in self.karten])
+
+    def print(self) -> str:
+        for k in self.karten:
+            pass
 
     def shuffle(self):
         shuffle(self.karten)
@@ -153,7 +263,7 @@ class AnlageStapel(object):
                 raise ValueError(
                     f"Die Karte {karte} kann nicht an einen leeren Stapel angelegt werden!")
         else:
-            oberste_karte=self.karten[-1]
+            oberste_karte = self.karten[-1]
             if oberste_karte.farbe.farbe == karte.farbe.farbe:
                 raise ValueError(
                     f"Gleichfarbige Karte {karte} kann nicht angelegt werden! Sie hat die selbe farbe wie die oberste {oberste_karte}!")
@@ -161,3 +271,8 @@ class AnlageStapel(object):
                 raise ValueError(
                     f"Karte {karte} kann nicht abgelegt werden! Sie folgt nicht auf die oberste Karte {oberste_karte} auf dem Stapel!")
         self.karten.append(karte)
+
+
+if __name__ == "__main__":
+    for k in [Karte(farbe=f, typ=t) for f in list(Farbe) for t in list(KartenTyp)]:
+        print(k.print())
