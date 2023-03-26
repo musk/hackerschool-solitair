@@ -81,8 +81,15 @@ class TestAnlageStapel(unittest.TestCase):
         nicht_erlaubt = [Karte(farbe=f, typ=t) for f in list(
             Farbe) for t in list(KartenTyp) if t != KartenTyp.KOENIG]
         for k in nicht_erlaubt:
-            stapel = AnlageStapel() 
+            stapel = AnlageStapel()
             self.assertRaises(ValueError, lambda: stapel.anlegen(k))
+
+    def test_nicht_aufeinander_folgende_values(self):
+        stapel = AnlageStapel()
+        stapel.karten = [Karte(farbe=Farbe.HERZ, typ=KartenTyp.FUENF)]
+        for k in [Karte(farbe=Farbe.KREUZ, typ=KartenTyp.SECHS), Karte(farbe=Farbe.KREUZ, typ=KartenTyp.DREI)]:
+            with self.subTest(karte=k):
+                self.assertRaises(ValueError, lambda: stapel.anlegen(k))
 
     def test_falsche_farbe_anlegen(self):
         stapel = AnlageStapel()

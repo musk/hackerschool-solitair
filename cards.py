@@ -39,7 +39,6 @@ class KartenTyp(Enum):
     BUBE = 10
     DAME = 10
     KOENIG = 10
-    
 
 
 class Karte(object):
@@ -141,8 +140,14 @@ class AnlageStapel(object):
     def anlegen(self, karte: Karte) -> None:
         if len(self.karten) <= 0:
             if karte.typ != KartenTyp.KOENIG:
-                raise ValueError(f"Die Karte {karte} kann nicht an einen leeren Stapel angelegt werden!")
-        elif self.karten[-1].farbe.farbe == karte.farbe.farbe:
-            raise ValueError(
-                f"Gleichfarbige karte (oberste={self.karten[-1]},karte={karte}) kann nicht angelegt werden! ")
+                raise ValueError(
+                    f"Die Karte {karte} kann nicht an einen leeren Stapel angelegt werden!")
+        else:
+            oberste_karte=self.karten[-1]
+            if oberste_karte.farbe.farbe == karte.farbe.farbe:
+                raise ValueError(
+                    f"Gleichfarbige Karte {karte} kann nicht angelegt werden! Sie hat die selbe farbe wie die oberste {oberste_karte}!")
+            if karte.typ.value >= oberste_karte.typ.value or karte.typ.value < oberste_karte.typ.value-1:
+                raise ValueError(
+                    f"Karte {karte} kann nicht abgelegt werden! Sie folgt nicht auf die oberste Karte {oberste_karte} auf dem Stapel!")
         self.karten.append(karte)
