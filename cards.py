@@ -2,6 +2,11 @@ from enum import Enum
 from random import shuffle
 
 
+class Constants(Enum):
+    ROT = 0
+    SCHWARZ = 1
+
+
 class Farbe(Enum):
     def __new__(cls, *args, **kwds):
         value = len(cls.__members__) + 1
@@ -9,14 +14,14 @@ class Farbe(Enum):
         obj._value_ = value
         return obj
 
-    def __init__(self, farbe, blatt: str):
+    def __init__(self, farbe: Constants, blatt: str):
         self.farbe = farbe
         self.blatt = blatt
 
-    KARO = "rot", "\u2666"
-    HERZ = "rot", "\u2665"
-    PIK = "schwarz", "\u2660"
-    KREUZ = "schwarz", "\u2663"
+    KARO = Constants.ROT, "\u2666"
+    HERZ = Constants.ROT, "\u2665"
+    PIK = Constants.SCHWARZ, "\u2660"
+    KREUZ = Constants.SCHWARZ, "\u2663"
 
 
 class KartenTyp(Enum):
@@ -51,10 +56,10 @@ class Karte(object):
         self.visible = visible
 
     def __repr__(self) -> str:
-        return f"Karte({self.farbe},{self.typ})"
+        return f"Karte({self.farbe},{self.typ},{self.visible})"
 
     def __str__(self) -> str:
-        return f"{self.farbe.name} {self.typ.name} ({self.typ.wert})"
+        return f"{self.farbe.blatt} {self.typ.name} ({self.typ.wert})"
 
     def __eq__(self, other: object) -> bool:
         if type(other) == Karte:
@@ -90,13 +95,12 @@ class Karte(object):
     def aufdecken(self):
         self.visible = True
 
-    def print(self) -> str:
-        return self.typ.front(self.farbe) if self.visible else self.typ.back()
-
 
 class Stapel(object):
     def __init__(self, karten: list[Karte] = []) -> None:
         self.karten = karten.copy()
+        if len(self.karten) > 0:
+            self.karten[-1].aufdecken()
 
     def __str__(self) -> str:
         return ", ".join([str(k) for k in self.karten])
@@ -111,7 +115,6 @@ class Stapel(object):
     def ziehen(self) -> Karte:
         if len(self.karten) > 0:
             k = self.karten.pop()
-            k.aufdecken()
             return k
         return None
 
@@ -163,6 +166,9 @@ class AnlageStapel(object):
 
     def top(self) -> Karte:
         return self.karten[-1] if len(self.karten) > 0 else None
+
+    def aufdecken(self):
+        self.top().aufdecken()
 
     def anlegen(self, karte: Karte) -> None:
         if len(self.karten) <= 0:

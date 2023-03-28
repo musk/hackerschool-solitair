@@ -1,5 +1,5 @@
 from cards import Karte, Stapel, AnlageStapel, AblageStapel, Farbe, KartenTyp
-from ascii import AsciiScreen, AsciiKarte
+from ascii import AsciiScreen, AsciiKarte, AsciiStapel
 
 
 class Solitair(object):
@@ -11,38 +11,57 @@ class Solitair(object):
         self.ablageKaro = AblageStapel(farbe=Farbe.KARO)
         self.ablageKreuz = AblageStapel(farbe=Farbe.KREUZ)
         self.ablagePik = AblageStapel(farbe=Farbe.PIK)
-        self.anlageStapel = [AnlageStapel() for i in range(7)]
+        self.anlageStapel = [AsciiStapel(AnlageStapel(
+            karten=self._initAnlage(i+1))) for i in range(7)]
         self.screen = AsciiScreen(width=70, height=35)
 
+    def _initAnlage(self, kartenZiehen: int) -> list[Karte]:
+        karten = []
+        for i in range(kartenZiehen):
+            karten.append(self.ziehStapel.ziehen())
+            if i == kartenZiehen-1:
+                karten[i].aufdecken()
+        return karten
+
     def _draw_card(self, karte: Karte) -> str:
-        blatt = AsciiKarte.back()
-        if karte:
+        if karte is None:
+            blatt = AsciiKarte.empty()
+        elif karte.aufgedeckt():
             blatt = AsciiKarte.front(karte)
+        else:
+            blatt = AsciiKarte.back()
         return blatt
-    
-    def _draw_anlage_stapel(self, stapel: AnlageStapel) -> str:
-        return self._draw_card(stapel.top())
 
     def _draw(self):
-        for idx, a in enumerate([self.ablageHerz, self.ablageKaro, self.ablagePik, self.ablageKreuz]):
+        for idx, (a, cmd) in enumerate([(self.ablageHerz, "[h]erz"),
+                                        (self.ablageKaro, "[k]aro"),
+                                        (self.ablagePik, "[p]ik"),
+                                        (self.ablageKreuz, "kreu[z]")]):
             self.screen.write_to_screen(self._draw_card(
                 a.top()), AsciiKarte.width()*idx, 0)
+            self.screen.write_to_screen(
+                cmd, AsciiKarte.width()*idx+1, AsciiKarte.height()+1)
 
         self.screen.write_to_screen(self._draw_card(
             self.ablageStapel.top()), self.screen.width - AsciiKarte.width()*2, 0)
         self.screen.write_to_screen(self._draw_card(
             self.ziehStapel.top()), self.screen.width - AsciiKarte.width(), 0)
+        # self.screen.write_to_screen(
+        #     "[z]iehen", self.screen.width - AsciiKarte.width()+1, AsciiKarte.height()+1)
 
         for idx, a in enumerate(self.anlageStapel):
-            self.screen.write_to_screen(self._draw_anlage_stapel(a), AsciiKarte.width()*idx, AsciiKarte.height()+3)
+            self.screen.write_to_screen(
+                a.print(), AsciiKarte.width()*idx, AsciiKarte.height()+4)
+            self.screen.write_to_screen(
+                f"[{idx}]", AsciiKarte.width()*idx+1, AsciiKarte.height()+3)
 
         self.screen.write_to_screen(self._menu(), 0, AsciiKarte.height() + 26)
         self.screen.print()
 
     def _menu(self):
         return """─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- z: ziehen          a: anlegen          l: ablegen 
- m: verschieben     x: Spiel beenden"""
+ [z]iehen  [a]nlegen  ab[l]egen   [v]erschieben     
+ [b]eenden"""
 
     def _waehle_anlage(self) -> AnlageStapel:
         nummer = -1
@@ -50,7 +69,7 @@ class Solitair(object):
             nummer = input("Auf welchen Stapel wollen sie die Karte anlegen?")
             if nummer < 0 or nummer >= 7:
                 print("Bitte geben sie eine Zahlt zwischen 0 und 7 an!")
-        return self.anlageStapel[nummer]
+        return self.anlageStapel[nummer].stapel
 
     def _waehle_ablage(self) -> AblageStapel:
         while True:
