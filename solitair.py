@@ -16,6 +16,7 @@ class Solitair(object):
             karten=self._initAnlage(i+1))) for i in range(7)]
         self.ziehStapel.aufdecken()
         self.screen = AsciiScreen(width=70, height=35)
+        self.navigation = False
 
     def _initAnlage(self, kartenZiehen: int) -> list[Karte]:
         karten = []
@@ -26,25 +27,30 @@ class Solitair(object):
         return karten
 
     def _draw(self):
-        for idx, (a, cmd) in enumerate([(self.ablageHerz, "[h]erz"),
-                                        (self.ablageKaro, "[k]aro"),
-                                        (self.ablagePik, "[p]ik"),
-                                        (self.ablageKreuz, "kreu[z]")]):
+        for idx, a in enumerate([self.ablageHerz,
+                                 self.ablageKaro,
+                                 self.ablagePik,
+                                 self.ablageKreuz]):
             self.screen.write_to_screen(AsciiKarte.print(a.top()),
                                         AsciiKarte.width()*idx, 0)
-            self.screen.write_to_screen(
-                cmd, AsciiKarte.width()*idx+1, AsciiKarte.height()+1)
 
         self.screen.write_to_screen(AsciiKarte.print(self.ablageStapel.top()),
                                     self.screen.width - AsciiKarte.width()*2, 0)
+        if self.navigation:
+            self.screen.write_to_screen(
+                f"[0]", self.screen.width - AsciiKarte.width()*2+1, AsciiKarte.height()+1)
         self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
                                     self.screen.width - AsciiKarte.width(), 0)
+        if self.navigation:
+            self.screen.write_to_screen(
+                f"[1]", self.screen.width - AsciiKarte.width()+1, AsciiKarte.height()+1)
 
         for idx, a in enumerate(self.anlageStapel):
             self.screen.write_to_screen(
                 a.printFanned(), AsciiKarte.width()*idx, AsciiKarte.height()+4)
-            self.screen.write_to_screen(
-                f"[{idx}]", AsciiKarte.width()*idx+1, AsciiKarte.height()+3)
+            if self.navigation:
+                self.screen.write_to_screen(
+                    f"[{idx+2}]", AsciiKarte.width()*idx+1, AsciiKarte.height()+3)
 
         self.screen.write_to_screen(self._menu(), 0, AsciiKarte.height() + 26)
         self.screen.print()
