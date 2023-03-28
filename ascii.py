@@ -52,6 +52,9 @@ class AsciiStapel(object):
         return len(self.stapel.karten)-1 * 2 + AsciiKarte.height()
 
     def print(self) -> str:
+        return AsciiKarte.print(self.stapel.top())
+
+    def printFanned(self) -> str:
         card_top = AsciiKarte.back().splitlines(keepends=True)[0]
         result = ""
         hidden = [k for k in self.stapel.karten if not k.aufgedeckt()]
@@ -80,6 +83,17 @@ class AsciiKarte(object):
     @classmethod
     def height(self) -> int:
         return 5
+
+    @classmethod
+    def print(self, karte: Karte) -> str:
+        blatt = ""
+        if karte is None:
+            blatt = self.empty()
+        elif karte.aufgedeckt():
+            blatt = self.front(karte)
+        else:
+            blatt = self.back()
+        return blatt
 
     @classmethod
     def front(self, karte: Karte) -> str:
@@ -115,7 +129,7 @@ class AsciiKarte(object):
 
 if __name__ == "__main__":
     screen = AsciiScreen(height=20, width=22)
-    stapel = AsciiStapel(AnlageStapel(karten=[
+    stapel = AsciiStapel(Stapel(karten=[
         Karte(farbe=Farbe.HERZ, typ=KartenTyp.FUENF),
         Karte(farbe=Farbe.PIK, typ=KartenTyp.ZWEI),
         Karte(farbe=Farbe.KREUZ, typ=KartenTyp.AS),
@@ -127,7 +141,7 @@ if __name__ == "__main__":
         Karte(farbe=Farbe.KREUZ, typ=KartenTyp.DREI, visible=True),
         Karte(farbe=Farbe.HERZ, typ=KartenTyp.ZWEI, visible=True)
     ]))
-    screen.write_to_screen(stapel.print(), 0, 0)
+    screen.write_to_screen(stapel.printFanned(), 0, 0)
     # with open(file="spielfeld.txt", mode="r") as f:
     #     txt="".join(f.readlines())
     #     screen.write_to_screen(txt)
