@@ -1,3 +1,5 @@
+from cards import Karte, Farbe, KartenTyp
+
 class AsciiScreen(object):
     def __init__(self, width=90, height=35):
         self.width = width
@@ -31,16 +33,51 @@ class AsciiScreen(object):
             if _y >= self.height:
                 # stop if we have reached bottom of screen
                 break
+            
         self._update_buffer()
 
     def print(self):
         print(self.buffer)
 
+class AsciiKarte(object):
+    @classmethod
+    def width(self)->int:
+        return 10
+    
+    @classmethod
+    def height(self) -> int:
+        return 5
+    
+    @classmethod
+    def front(self, karte: Karte) -> str:
+        typ = karte.typ.blatt
+        farbe = karte.farbe.blatt
+        return """┌────────┐
+│ {0}    {1} │
+│        │
+│        │
+│ {1}    {0} │
+└────────┘""".format(typ, farbe)
+    
+    @classmethod
+    def back(self) -> str:
+        return """┌────────┐
+│▒▒▒▒▒▒▒▒│
+│▒▒▒▒▒▒▒▒│
+│▒▒▒▒▒▒▒▒│
+│▒▒▒▒▒▒▒▒│
+└────────┘
+"""
+
 
 if __name__ == "__main__":
-    screen = AsciiScreen(height=40, width=50)
-    with open(file="spielfeld.txt", mode="r") as f:
-        txt="".join(f.readlines())
-        screen.write_to_screen(txt)
-    screen.write_to_screen("Hello what do you want to do? ", 0,28)
+    screen = AsciiScreen(height=7, width=22)
+    herz5 =AsciiKarte.front(Karte(typ=KartenTyp.FUENF, farbe=Farbe.HERZ))
+    screen.write_to_screen(herz5, 0, 0)
+    karo5 = AsciiKarte.front(Karte(typ=KartenTyp.FUENF, farbe=Farbe.KARO))
+    screen.write_to_screen(karo5, 10, 0)
+    # with open(file="spielfeld.txt", mode="r") as f:
+    #     txt="".join(f.readlines())
+    #     screen.write_to_screen(txt)
+    # screen.write_to_screen("Hello what do you want to do? ", 0,28)
     screen.print()
