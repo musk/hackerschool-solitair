@@ -107,12 +107,16 @@ class TestStapel(unittest.TestCase):
         s.anlegen(k2)
         self.assertEqual(k2, s.top())
 
+    def test_aufdecken_on_empty_stapel(self):
+        s = Stapel()
+        s.aufdecken()
+
     def test_aufdecken(self):
         s = Stapel(karten=[Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)])
         self.assertFalse(s.top().aufgedeckt())
         s.aufdecken()
         self.assertTrue(s.top().aufgedeckt())
-        
+
 
 class TestAnlageStapel(unittest.TestCase):
     def test_koenige_koennen_an_leeren_stapel_angelegt_werden(self):

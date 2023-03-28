@@ -108,7 +108,9 @@ class Stapel(object):
         return self.karten[-1] if len(self.karten) > 0 else None
 
     def aufdecken(self):
-        self.top().aufdecken()
+        k = self.top()
+        if k:
+            k.aufdecken()
 
     def ziehen(self) -> Karte:
         if len(self.karten) > 0:
