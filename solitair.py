@@ -5,7 +5,7 @@ from ascii import AsciiScreen, AsciiKarte, AsciiStapel
 class Solitair(object):
     def __init__(self) -> None:
         self.ziehStapel = Stapel(karten=[Karte(col, type) for col in list(Farbe)
-                                         for type in list(KartenTyp)])
+                                         for type in list(KartenTyp)], ablage=False)
         self.ablageStapel = Stapel()
         self.ablageHerz = AblageStapel(farbe=Farbe.HERZ)
         self.ablageKaro = AblageStapel(farbe=Farbe.KARO)

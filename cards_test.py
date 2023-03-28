@@ -43,28 +43,28 @@ class TestKarte(unittest.TestCase):
 
 
 class TestAblageStapel(unittest.TestCase):
-    def test_nicht_ablegbar(self):
+    def test_nicht_anlegbar(self):
         ablage = AblageStapel(farbe=Farbe.HERZ)
         k = Karte(farbe=Farbe.KARO, typ=KartenTyp.AS, visible=True)
-        self.assertFalse(ablage.ablegbar(k))
-        self.assertRaises(ValueError, lambda: ablage.ablegen(k))
+        self.assertFalse(ablage.anlegbar(k))
+        self.assertRaises(ValueError, lambda: ablage.anlegen(k))
 
-    def test_ablegen(self):
+    def test_anlegen(self):
         for f in list(Farbe):
             karten = [Karte(farbe=f, typ=t) for t in list(KartenTyp)]
             for idx, k in enumerate(karten):
                 stapel = AblageStapel(f, karten[0:idx])
                 with self.subTest(stapel=stapel, karte=k):
-                    stapel.ablegen(k)
+                    stapel.anlegen(k)
 
-    def test_ablegbar(self):
+    def test_anlegbar(self):
         for f in list(Farbe):
             stapel = AblageStapel(f)
             karten = [Karte(farbe=f, typ=t) for t in list(KartenTyp)]
             for idx, k in enumerate(karten):
                 with self.subTest(k=k):
                     stapel.karten = karten[0:idx].copy()
-                    self.assertTrue(stapel.ablegbar(k))
+                    self.assertTrue(stapel.anlegbar(k))
 
 
 class TestStapel(unittest.TestCase):
@@ -82,6 +82,37 @@ class TestStapel(unittest.TestCase):
         for k in karten:
             self.assertEqual(k, deck.ziehen())
 
+    def test_ablegen_auf_stapel(self):
+        s = Stapel(ablage=True)
+        k = Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)
+        s.anlegen(k)
+        self.assertEqual(1, len(s.karten))
+        self.assertEqual(k, s.karten[-1])
+        s.anlegen(Karte(farbe=Farbe.KARO, typ=KartenTyp.DAME))
+        self.assertEqual(2, len(s.karten))
+
+    def test_ablegen_auf_nicht_ablegbaren_stapel(self):
+        s = Stapel(ablage=False)
+        k = Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)
+        self.assertFalse(s.anlegbar(k))
+        self.assertRaises(ValueError, lambda: s.anlegen(k))
+
+    def test_top(self):
+        s = Stapel()
+        k1 = Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)
+        k2 = Karte(farbe=Farbe.KARO, typ=KartenTyp.ZWEI)
+        self.assertEqual(None, s.top())
+        s.anlegen(k1)
+        self.assertEqual(k1, s.top())
+        s.anlegen(k2)
+        self.assertEqual(k2, s.top())
+
+    def test_aufdecken(self):
+        s = Stapel(karten=[Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)])
+        self.assertFalse(s.top().aufgedeckt())
+        s.aufdecken()
+        self.assertTrue(s.top().aufgedeckt())
+        
 
 class TestAnlageStapel(unittest.TestCase):
     def test_koenige_koennen_an_leeren_stapel_angelegt_werden(self):

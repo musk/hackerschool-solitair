@@ -97,10 +97,9 @@ class Karte(object):
 
 
 class Stapel(object):
-    def __init__(self, karten: list[Karte] = []) -> None:
+    def __init__(self, karten: list[Karte] = [], ablage: bool = True) -> None:
+        self.ablage = ablage
         self.karten = karten.copy()
-        if len(self.karten) > 0:
-            self.karten[-1].aufdecken()
 
     def __str__(self) -> str:
         return ", ".join([str(k) for k in self.karten])
@@ -108,9 +107,8 @@ class Stapel(object):
     def top(self) -> Karte:
         return self.karten[-1] if len(self.karten) > 0 else None
 
-    def shuffle(self):
-        shuffle(self.karten)
-        return self
+    def aufdecken(self):
+        self.top().aufdecken()
 
     def ziehen(self) -> Karte:
         if len(self.karten) > 0:
@@ -118,38 +116,37 @@ class Stapel(object):
             return k
         return None
 
-    def ablegen(self, karte: Karte) -> None:
-        karte.aufdecken()
+    def anlegen(self, karte: Karte) -> None:
+        if not self.anlegbar(karte):
+            raise ValueError(
+                f"Karte {karte} kann nicht auf dem Stapel {self} abgelegt werden!")
         self.karten.append(karte)
 
+    def anlegbar(self, karte) -> bool:
+        return self.ablage
 
-class AblageStapel(object):
+    def shuffle(self):
+        shuffle(self.karten)
+        return self
+
+
+class AblageStapel(Stapel):
     def __init__(self, farbe: Farbe, karten: list[Karte] = []):
+        Stapel.__init__(self, karten)
         self.farbe = farbe
-        self.karten = karten.copy()
 
     def __repr__(self) -> str:
-        return f"Stapel({repr(self.farbe)}, {repr(self.karten)})"
+        return f"AblageStapel({repr(self.farbe)}, {repr(self.karten)})"
 
     def __str__(self) -> str:
-        return f"Stapel({self.farbe.name}, {self.karten[-1] if len(self.karten) > 0 else []})"
+        return f"AblageStapel({self.farbe.name}, {self.karten[-1] if len(self.karten) > 0 else []})"
 
-    def top(self) -> Karte:
-        return self.karten[-1] if len(self.karten) > 0 else None
-
-    def ablegen(self, karte: Karte) -> None:
-        if karte.farbe != self.farbe:
-            raise ValueError(
-                f"Karte {karte} kann nicht auf dem Stapel {self.farbe} abgelegt werden!")
-        elif not self.ablegbar(karte):
-            raise ValueError(
-                f"Die Karte {karte} kann nicht als nächstes auf dem Stapel {self} abgelegt werden!")
-        self.karten.append(karte)
-
-    def ablegbar(self, karte) -> bool:
+    def anlegbar(self, karte) -> bool:
         """
         :karte Karte: prüft ob karte auf dem Stapel abgelegt werden kann
         """
+        if karte.farbe != self.farbe:
+            return False
         if len(self.karten) <= 0:
             nextKarte = Karte(farbe=self.farbe, typ=KartenTyp.AS)
         elif self.karten[-1].typ.value >= len(list(KartenTyp)):
@@ -160,30 +157,21 @@ class AblageStapel(object):
         return karte == nextKarte
 
 
-class AnlageStapel(object):
+class AnlageStapel(Stapel):
     def __init__(self, karten: list[Karte] = []):
-        self.karten = karten.copy()
+        Stapel.__init__(self, karten)
 
-    def top(self) -> Karte:
-        return self.karten[-1] if len(self.karten) > 0 else None
-
-    def aufdecken(self):
-        self.top().aufdecken()
-
-    def anlegen(self, karte: Karte) -> None:
+    def anlegbar(self, karte) -> bool:
         if len(self.karten) <= 0:
             if karte.typ != KartenTyp.KOENIG:
-                raise ValueError(
-                    f"Die Karte {karte} kann nicht an einen leeren Stapel angelegt werden!")
+                return False
         else:
             oberste_karte = self.karten[-1]
             if oberste_karte.farbe.farbe == karte.farbe.farbe:
-                raise ValueError(
-                    f"Gleichfarbige Karte {karte} kann nicht angelegt werden! Sie hat die selbe farbe wie die oberste {oberste_karte}!")
-            if karte.typ.value >= oberste_karte.typ.value or karte.typ.value < oberste_karte.typ.value-1:
-                raise ValueError(
-                    f"Karte {karte} kann nicht abgelegt werden! Sie folgt nicht auf die oberste Karte {oberste_karte} auf dem Stapel!")
-        self.karten.append(karte)
+                return False
+            elif karte.typ.value >= oberste_karte.typ.value or karte.typ.value < oberste_karte.typ.value-1:
+                return False
+        return True
 
 
 if __name__ == "__main__":
