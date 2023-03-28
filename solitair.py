@@ -6,6 +6,7 @@ class Solitair(object):
     def __init__(self) -> None:
         self.ziehStapel = Stapel(karten=[Karte(col, type) for col in list(Farbe)
                                          for type in list(KartenTyp)], ablage=False)
+        self.ziehStapel.shuffle()
         self.ablageStapel = Stapel()
         self.ablageHerz = AblageStapel(farbe=Farbe.HERZ)
         self.ablageKaro = AblageStapel(farbe=Farbe.KARO)
@@ -13,6 +14,7 @@ class Solitair(object):
         self.ablagePik = AblageStapel(farbe=Farbe.PIK)
         self.anlageStapel = [AsciiStapel(AnlageStapel(
             karten=self._initAnlage(i+1))) for i in range(7)]
+        self.ziehStapel.aufdecken()
         self.screen = AsciiScreen(width=70, height=35)
 
     def _initAnlage(self, kartenZiehen: int) -> list[Karte]:
@@ -23,35 +25,24 @@ class Solitair(object):
                 karten[i].aufdecken()
         return karten
 
-    def _draw_card(self, karte: Karte) -> str:
-        if karte is None:
-            blatt = AsciiKarte.empty()
-        elif karte.aufgedeckt():
-            blatt = AsciiKarte.front(karte)
-        else:
-            blatt = AsciiKarte.back()
-        return blatt
-
     def _draw(self):
         for idx, (a, cmd) in enumerate([(self.ablageHerz, "[h]erz"),
                                         (self.ablageKaro, "[k]aro"),
                                         (self.ablagePik, "[p]ik"),
                                         (self.ablageKreuz, "kreu[z]")]):
-            self.screen.write_to_screen(self._draw_card(
-                a.top()), AsciiKarte.width()*idx, 0)
+            self.screen.write_to_screen(AsciiKarte.print(a.top()),
+                                        AsciiKarte.width()*idx, 0)
             self.screen.write_to_screen(
                 cmd, AsciiKarte.width()*idx+1, AsciiKarte.height()+1)
 
-        self.screen.write_to_screen(self._draw_card(
-            self.ablageStapel.top()), self.screen.width - AsciiKarte.width()*2, 0)
-        self.screen.write_to_screen(self._draw_card(
-            self.ziehStapel.top()), self.screen.width - AsciiKarte.width(), 0)
-        # self.screen.write_to_screen(
-        #     "[z]iehen", self.screen.width - AsciiKarte.width()+1, AsciiKarte.height()+1)
+        self.screen.write_to_screen(AsciiKarte.print(self.ablageStapel.top()),
+                                    self.screen.width - AsciiKarte.width()*2, 0)
+        self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
+                                    self.screen.width - AsciiKarte.width(), 0)
 
         for idx, a in enumerate(self.anlageStapel):
             self.screen.write_to_screen(
-                a.print(), AsciiKarte.width()*idx, AsciiKarte.height()+4)
+                a.printFanned(), AsciiKarte.width()*idx, AsciiKarte.height()+4)
             self.screen.write_to_screen(
                 f"[{idx}]", AsciiKarte.width()*idx+1, AsciiKarte.height()+3)
 
