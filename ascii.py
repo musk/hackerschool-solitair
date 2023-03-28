@@ -1,4 +1,4 @@
-from cards import Karte, Farbe, KartenTyp, AnlageStapel
+from cards import Karte, Farbe, KartenTyp, Stapel
 
 
 class AsciiScreen(object):
@@ -42,7 +42,7 @@ class AsciiScreen(object):
 
 
 class AsciiStapel(object):
-    def __init__(self, stapel: AnlageStapel):
+    def __init__(self, stapel: Stapel):
         self.stapel = stapel
 
     def width(self) -> int:
