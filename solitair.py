@@ -3,6 +3,14 @@ from ascii import AsciiScreen, AsciiKarte, AsciiStapel
 
 
 class Solitair(object):
+    SOLITAIR = """
+        ███████╗ ██████╗ ██╗     ██╗████████╗ █████╗ ██╗██████╗                       
+        ██╔════╝██╔═══██╗██║     ██║╚══██╔══╝██╔══██╗██║██╔══██╗                      
+        ███████╗██║   ██║██║     ██║   ██║   ███████║██║██████╔╝                      
+        ╚════██║██║   ██║██║     ██║   ██║   ██╔══██║██║██╔══██╗                      
+        ███████║╚██████╔╝███████╗██║   ██║   ██║  ██║██║██║  ██║                      
+        ╚══════╝ ╚═════╝ ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
+                        (c) 2023 Stefan Langer"""
 
     COMMANDS = {"z": {"text": "[z]iehen", "method": f"self._ziehen()"},
                 "a": {"text": "[a]nlegen", "method": f"self._anlegen()"},
@@ -107,7 +115,11 @@ class Solitair(object):
         self.navigation_ablage = False
 
     def _end(self):
-        print("Danke das sie Solitair gespielt haben!")
+        self.screen.clear_screen()
+        self.screen.write_to_screen(self.SOLITAIR + """  
+                Danke das sie Solitair gespielt haben!              
+""", 0, 10)
+        self.screen.print()
         exit(0)
 
     def _umdrehen(self):
@@ -186,17 +198,9 @@ class Solitair(object):
 
     def _draw_welcome(self):
         self.screen.clear_screen()
-        self.screen.write_to_screen("""
-        ███████╗ ██████╗ ██╗     ██╗████████╗ █████╗ ██╗██████╗                       
-        ██╔════╝██╔═══██╗██║     ██║╚══██╔══╝██╔══██╗██║██╔══██╗                      
-        ███████╗██║   ██║██║     ██║   ██║   ███████║██║██████╔╝                      
-        ╚════██║██║   ██║██║     ██║   ██║   ██╔══██║██║██╔══██╗                      
-        ███████║╚██████╔╝███████╗██║   ██║   ██║  ██║██║██║  ██║                      
-        ╚══════╝ ╚═════╝ ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
-                        (c) 2023 Stefan Langer
-                
+        self.screen.write_to_screen(self.SOLITAIR + """  
                      Drücke Enter um fortzufahren                   
-""", 0,10)
+""", 0, 10)
         self.screen.print()
 
     def _draw_gewonnen(self):
@@ -216,8 +220,8 @@ class Solitair(object):
 ╚██████╔╝███████╗╚███╔███╔╝╚██████╔╝██║ ╚████║██║ ╚████║███████╗██║ ╚████║
  ╚═════╝ ╚══════╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═══╝
 
-                        (c) 2023 Stefan Langer
-""", 0,10)
+                      (c) 2023 Stefan Langer
+""", 0, 10)
         self.screen.print()
 
     def play(self):
