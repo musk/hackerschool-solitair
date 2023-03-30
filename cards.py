@@ -94,6 +94,11 @@ class Karte(object):
 
     def aufdecken(self):
         self.visible = True
+        return self
+
+    def zudecken(self):
+        self.visible = False
+        return self
 
 
 class Stapel(object):
@@ -131,6 +136,8 @@ class Stapel(object):
         shuffle(self.karten)
         return self
 
+    def leer(self) -> bool:
+        return len(self.karten) == 0
 
 class AblageStapel(Stapel):
     def __init__(self, farbe: Farbe, karten: list[Karte] = []):
