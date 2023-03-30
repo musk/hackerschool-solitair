@@ -48,7 +48,7 @@ class Solitair(object):
                                     self.screen.width - AsciiKarte.width()*2-2, 0)
         if self.navigation_ablage:
             self.screen.write_to_screen(
-                f"[{len(self.anlageStapel)}]", self.screen.width - AsciiKarte.width()*2+1, AsciiKarte.height()+1)
+                f"[{len(self.anlageStapel)}]", self.screen.width - AsciiKarte.width()*2-1, AsciiKarte.height()+1)
         self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
                                     self.screen.width - AsciiKarte.width()-2, 0)
 
@@ -223,6 +223,7 @@ class Solitair(object):
     def play(self):
         self._draw_welcome()
         input()
+        self.screen.clear_screen()
         self._draw()
         # the game loop
         while not self._gewonnen():
