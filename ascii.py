@@ -1,11 +1,12 @@
 from cards import Karte, Farbe, KartenTyp, Stapel
+from time import sleep
 
 
 class AsciiScreen(object):
     def __init__(self, width=90, height=35):
         self.width = width
         self.height = height
-        self.screen = [" " for x in range(0, width) for y in range(0, height)]
+        self.screen = [" " for t in range(0, width*height)]
         self.buffer = ""
 
     def _update_buffer(self) -> str:
@@ -15,6 +16,9 @@ class AsciiScreen(object):
                 result += self.screen[self.width*y+x]
             result += "\n"
         self.buffer = result
+
+    def clear_screen(self):
+        self.screen = [" " for t in range(0, self.width*self.height)]
 
     def write_to_screen(self, text: str, x: int = 0, y: int = 0):
         # TODO check that x y are within limits
@@ -141,9 +145,10 @@ if __name__ == "__main__":
         Karte(farbe=Farbe.KREUZ, typ=KartenTyp.DREI, visible=True),
         Karte(farbe=Farbe.HERZ, typ=KartenTyp.ZWEI, visible=True)
     ]))
-    screen.write_to_screen(stapel.printFanned(), 0, 0)
-    # with open(file="spielfeld.txt", mode="r") as f:
-    #     txt="".join(f.readlines())
-    #     screen.write_to_screen(txt)
-    # screen.write_to_screen("Hello what do you want to do? ", 0,28)
-    screen.print()
+    for i in range(0,11):
+        screen.write_to_screen(stapel.printFanned(), 0, 0)
+        screen.print()
+        stapel.stapel.ziehen()
+        stapel.stapel.aufdecken()
+        sleep(1)
+        screen.clear_screen()
