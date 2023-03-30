@@ -66,6 +66,14 @@ class TestAblageStapel(unittest.TestCase):
                     stapel.karten = karten[0:idx].copy()
                     self.assertTrue(stapel.anlegbar(k))
 
+    def test_komplett(self):
+        komplett = [Karte(farbe=Farbe.HERZ, typ=t) for t in list(KartenTyp)]
+        k = komplett.pop()
+        s = AblageStapel(farbe=Farbe.HERZ, karten=komplett)
+        self.assertFalse(s.komplett())
+        s.anlegen(k)
+        self.assertTrue(s.komplett())
+
 
 class TestStapel(unittest.TestCase):
     def test_ziehen_von_leerem_stapel(self):
@@ -242,7 +250,6 @@ class TestAnlageStapel(unittest.TestCase):
         self.assertEqual(behalten, von.karten)
         self.assertEqual(exist+verschoben, zu.karten)
         self.assertTrue(von.leer())
-
 
     def _assertOrder(self, stapel: AnlageStapel) -> None:
         prev_farbe = None

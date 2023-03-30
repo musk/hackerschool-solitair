@@ -181,14 +181,13 @@ class Solitair(object):
         else:
             self._write_message("")
 
-    def _won(self):
-        
-        return False
+    def _gewonnen(self):
+        return self.ablageHerz.komplett() and self.ablageKaro.komplett() and self.ablageKreuz.komplett() and self.ablagePik.komplett()
 
     def play(self):
         self._draw()
         # the game loop
-        while not self._won():
+        while not self._gewonnen():
             self.status_msg = ""
             self._input()
             self.screen.clear_screen()

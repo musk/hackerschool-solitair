@@ -167,6 +167,9 @@ class AblageStapel(Stapel):
             nextKarte = Karte(farbe=self.farbe, typ=list(KartenTyp)[next_idx])
         return karte == nextKarte
 
+    def komplett(self) -> bool:
+        return len(self.karten) == len(list(KartenTyp))
+
 
 class AnlageStapel(Stapel):
     def __init__(self, karten: list[Karte] = []):
