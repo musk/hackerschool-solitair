@@ -22,7 +22,7 @@ class Solitair(object):
         self.ablagePik = AblageStapel(farbe=Farbe.PIK)
         self.anlageStapel = [AsciiStapel(AnlageStapel(
             karten=self._initAnlage(i+1))) for i in range(7)]
-        self.screen = AsciiScreen(width=70, height=AsciiKarte.height()*2 + 33)
+        self.screen = AsciiScreen(width=74, height=AsciiKarte.height()*2 + 33)
         self.navigation = False
         self.navigation_anlage = False
         self.navigation_ablage = False
@@ -42,27 +42,27 @@ class Solitair(object):
                                  self.ablagePik,
                                  self.ablageKreuz]):
             self.screen.write_to_screen(AsciiKarte.print(a.top()),
-                                        AsciiKarte.width()*idx, 0)
+                                        AsciiKarte.width()*idx+2, 0)
 
         self.screen.write_to_screen(AsciiKarte.print(self.ablageStapel.top()),
-                                    self.screen.width - AsciiKarte.width()*2, 0)
+                                    self.screen.width - AsciiKarte.width()*2-2, 0)
         if self.navigation_ablage:
             self.screen.write_to_screen(
                 f"[{len(self.anlageStapel)}]", self.screen.width - AsciiKarte.width()*2+1, AsciiKarte.height()+1)
         self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
-                                    self.screen.width - AsciiKarte.width(), 0)
+                                    self.screen.width - AsciiKarte.width()-2, 0)
 
         for idx, a in enumerate(self.anlageStapel):
             self.screen.write_to_screen(
-                a.printFanned(), AsciiKarte.width()*idx, AsciiKarte.height()+4)
+                a.printFanned(), AsciiKarte.width()*idx+2, AsciiKarte.height()+4)
             if self.navigation_anlage:
                 self.screen.write_to_screen(
-                    f"[{idx}]", AsciiKarte.width()*idx+1, AsciiKarte.height()+3)
+                    f"[{idx}]", AsciiKarte.width()*idx+3, AsciiKarte.height()+3)
 
         self.screen.write_to_screen(
             self._menu(), 0, AsciiKarte.height()*2 + 29)
         self.screen.write_to_screen(
-            self.status_msg, 0, AsciiKarte.height()*2 + 27)
+            self.status_msg, 2, AsciiKarte.height()*2 + 27)
         self.screen.print()
 
     def _menu(self):
@@ -184,7 +184,45 @@ class Solitair(object):
     def _gewonnen(self):
         return self.ablageHerz.komplett() and self.ablageKaro.komplett() and self.ablageKreuz.komplett() and self.ablagePik.komplett()
 
+    def _draw_welcome(self):
+        self.screen.clear_screen()
+        self.screen.write_to_screen("""
+        ███████╗ ██████╗ ██╗     ██╗████████╗ █████╗ ██╗██████╗                       
+        ██╔════╝██╔═══██╗██║     ██║╚══██╔══╝██╔══██╗██║██╔══██╗                      
+        ███████╗██║   ██║██║     ██║   ██║   ███████║██║██████╔╝                      
+        ╚════██║██║   ██║██║     ██║   ██║   ██╔══██║██║██╔══██╗                      
+        ███████║╚██████╔╝███████╗██║   ██║   ██║  ██║██║██║  ██║                      
+        ╚══════╝ ╚═════╝ ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
+                        (c) 2023 Stefan Langer
+                
+                     Drücke Enter um fortzufahren                   
+""", 0,10)
+        self.screen.print()
+
+    def _draw_gewonnen(self):
+        self.screen.clear_screen()
+        self.screen.write_to_screen("""
+        ███████╗ ██████╗ ██╗     ██╗████████╗ █████╗ ██╗██████╗ 
+        ██╔════╝██╔═══██╗██║     ██║╚══██╔══╝██╔══██╗██║██╔══██╗
+        ███████╗██║   ██║██║     ██║   ██║   ███████║██║██████╔╝
+        ╚════██║██║   ██║██║     ██║   ██║   ██╔══██║██║██╔══██╗
+        ███████║╚██████╔╝███████╗██║   ██║   ██║  ██║██║██║  ██║
+        ╚══════╝ ╚═════╝ ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
+
+ ██████╗ ███████╗██╗    ██╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗███╗   ██╗
+██╔════╝ ██╔════╝██║    ██║██╔═══██╗████╗  ██║████╗  ██║██╔════╝████╗  ██║
+██║  ███╗█████╗  ██║ █╗ ██║██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██╔██╗ ██║
+██║   ██║██╔══╝  ██║███╗██║██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██║╚██╗██║
+╚██████╔╝███████╗╚███╔███╔╝╚██████╔╝██║ ╚████║██║ ╚████║███████╗██║ ╚████║
+ ╚═════╝ ╚══════╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═══╝
+
+                        (c) 2023 Stefan Langer
+""", 0,10)
+        self.screen.print()
+
     def play(self):
+        self._draw_welcome()
+        input()
         self._draw()
         # the game loop
         while not self._gewonnen():
@@ -192,6 +230,8 @@ class Solitair(object):
             self._input()
             self.screen.clear_screen()
             self._draw()
+        self._draw_gewonnen()
+        input()
 
 
 def main():
