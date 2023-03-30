@@ -3,9 +3,17 @@ from ascii import AsciiScreen, AsciiKarte, AsciiStapel
 
 
 class Solitair(object):
+
+    COMMANDS = {"z": {"text": "[z]iehen", "method": f"self._ziehen()"},
+                "a": {"text": "[a]nlegen", "method": f"self._anlegen()"},
+                "l": {"text": "ab[l]egen", "method": f"self._ablegen()"},
+                "v": {"text": "[v]erschieben", "method": f"self._verschieben()"},
+                "u": {"text": "[u]mdrehen", "method": f"self._umdrehen()"},
+                "b": {"text": "[b]eenden", "method": f"self._end()"}, }
+
     def __init__(self) -> None:
         self.ziehStapel = Stapel(karten=[Karte(col, type) for col in list(Farbe)
-                                         for type in list(KartenTyp)], ablage=False)
+                                         for type in list(KartenTyp)], ablage=True)
         self.ziehStapel.shuffle()
         self.ablageStapel = Stapel()
         self.ablageHerz = AblageStapel(farbe=Farbe.HERZ)
@@ -14,9 +22,9 @@ class Solitair(object):
         self.ablagePik = AblageStapel(farbe=Farbe.PIK)
         self.anlageStapel = [AsciiStapel(AnlageStapel(
             karten=self._initAnlage(i+1))) for i in range(7)]
-        self.ziehStapel.aufdecken()
         self.screen = AsciiScreen(width=70, height=35)
         self.navigation = False
+        self.status_msg = ""
 
     def _initAnlage(self, kartenZiehen: int) -> list[Karte]:
         karten = []
@@ -38,74 +46,112 @@ class Solitair(object):
                                     self.screen.width - AsciiKarte.width()*2, 0)
         if self.navigation:
             self.screen.write_to_screen(
-                f"[0]", self.screen.width - AsciiKarte.width()*2+1, AsciiKarte.height()+1)
+                f"[{len(self.anlageStapel)}]", self.screen.width - AsciiKarte.width()*2+1, AsciiKarte.height()+1)
         self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
                                     self.screen.width - AsciiKarte.width(), 0)
-        if self.navigation:
-            self.screen.write_to_screen(
-                f"[1]", self.screen.width - AsciiKarte.width()+1, AsciiKarte.height()+1)
-
+        
         for idx, a in enumerate(self.anlageStapel):
             self.screen.write_to_screen(
                 a.printFanned(), AsciiKarte.width()*idx, AsciiKarte.height()+4)
             if self.navigation:
                 self.screen.write_to_screen(
-                    f"[{idx+2}]", AsciiKarte.width()*idx+1, AsciiKarte.height()+3)
+                    f"[{idx}]", AsciiKarte.width()*idx+1, AsciiKarte.height()+3)
 
         self.screen.write_to_screen(self._menu(), 0, AsciiKarte.height() + 26)
+        self.screen.write_to_screen(self.status_msg, 0, AsciiKarte.height() + 24)
         self.screen.print()
 
     def _menu(self):
-        return """─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- [z]iehen  [a]nlegen  ab[l]egen   [v]erschieben     
- [b]eenden"""
-
-    def _waehle_anlage(self) -> AnlageStapel:
-        nummer = -1
-        while nummer < 0 or nummer >= 7:
-            nummer = input("Auf welchen Stapel wollen sie die Karte anlegen?")
-            if nummer < 0 or nummer >= 7:
-                print("Bitte geben sie eine Zahlt zwischen 0 und 7 an!")
-        return self.anlageStapel[nummer].stapel
-
-    def _waehle_ablage(self) -> AblageStapel:
-        while True:
-            eingabe = input(
-                "Auf welchen Ablagestapel soll die Karte abgelegt werden? h: Herz k: Karo p: Pik z: Kreuz")
-            if eingabe == "h":
-                return self.ablageHerz
-            elif eingabe == "k":
-                return self.ablageKaro
-            elif eingabe == "p":
-                return self.ablagePik
-            elif eingabe == "z":
-                return self.ablageKreuz
-            else:
-                print("Bitte wählen sie eine gültige eingabe!")
+        menu = "".join(["─" for i in range(self.screen.width)]) + "\n"
+        idx = 1
+        for cmd in [v["text"] for k, v in self.COMMANDS.items()]:
+            menu += cmd + "\t"
+            if idx % 4 == 0:
+                menu += "\n"
+            idx += 1
+        return menu
 
     def _input(self):
-        eingabe: str = input("Zug? ").lower().strip()
-        if eingabe == "a":
-            a = self._waehle_anlage()
-            k = self.ziehStapel.ziehen()
-            a.anlegen(k)
-        elif eingabe == "l":
-            a = self._waehle_ablage()
-            k = self._waehle_anlage()
+        eingabe: str = input("Option: ").lower().strip()
+        if eingabe in self.COMMANDS:
+            exec(self.COMMANDS[eingabe]["method"])
+        else:
+            self._write_message(
+                f"Ungültige eingabe: {eingabe}! Bitte wählen sie eine gültige Option.")
 
-            pass
-        elif eingabe == "m":
-            pass
-        elif eingabe == "x":
-            print("Herzlichen Dank das sie Solitair gespielt haben!")
-            exit(0)
-        elif eingabe == "z":
-            pass
+    def _write_message(self, text: str):
+        self.status_msg = text
+
+    def _end(self):
+        print("Danke das sie Solitair gespielt haben!")
+        exit(0)
+
+    def _get_number(self, msg: str, range: range) -> int:
+        num = ""
+        while True:
+            num = input(msg).strip()
+            if num.isdigit() and int(num) in range:
+                return int(num)
+            else:
+                self._write_message("Bitte geben sie eine gültige Zahl an!")
+
+    def _toggle_navigation(self):
+        self.navigation = not self.navigation
+        self._draw()
+
+    def _umdrehen(self):
+        if self.ziehStapel.leer():
+            k = self.ablageStapel.ziehen()
+            while k:
+                self.ziehStapel.anlegen(k.zudecken())
+                k = self.ablageStapel.ziehen()
+            self.ziehStapel.shuffle()
+        else:
+            self._write_message("Umdrehen nicht möglich, es sind noch Karten auf dem Stapel!")
+
+    def _ziehen(self):
+        k = self.ziehStapel.ziehen()
+        if k:
+            self.ablageStapel.anlegen(k.aufdecken())
+
+    def _ablegen(self):
+        self._toggle_navigation()
+        idx = self._get_number(
+            "Welchen Stapel möchten sie ablegen?", range(0, len(self.anlageStapel)+1))
+        self._toggle_navigation()
+        k: Karte = None
+        if idx < len(self.anlageStapel):
+            stapel = self.anlageStapel[idx].stapel
+        elif idx == len(self.anlageStapel):
+            stapel = self.ablageStapel
+
+        k = stapel.top()
+        msg = ""
+        if k:
+            for s in [self.ablageHerz, self.ablageKaro, self.ablagePik, self.ablageKreuz]:
+                if k.farbe == s.farbe:
+                    if s.anlegbar(k):  
+                        s.anlegen(stapel.ziehen())
+                        stapel.aufdecken()
+                        break
+                    else:
+                        msg = f"Karte {k.farbe.blatt} {k.typ.name.capitalize()} kann nicht abgelegt werden!"
+            self._write_message(msg)
+                
+    def _anlegen(self):
+        pass
+
+    def _verschieben(self):
+        pass
 
     def play(self):
+        self._draw()
         # the game loop
         while True:
-            pass
+            self.status_msg = ""
+            self._input()
+            self.screen.clear_screen()
+            self._draw()
 
 
 def main():
@@ -113,7 +159,7 @@ def main():
     The enty program for the solitair program
     '''
     s = Solitair()
-    s._draw()
+    s.play()
 
 
 if __name__ == "__main__":
