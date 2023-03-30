@@ -130,7 +130,7 @@ class Stapel(object):
                 f"Karte {karte} kann nicht auf dem Stapel {self} abgelegt werden!")
         self.karten.append(karte)
 
-    def anlegbar(self, karte) -> bool:
+    def anlegbar(self, karte: Karte) -> bool:
         return self.ablage
 
     def shuffle(self):
@@ -139,6 +139,7 @@ class Stapel(object):
 
     def leer(self) -> bool:
         return len(self.karten) == 0
+
 
 class AblageStapel(Stapel):
     def __init__(self, farbe: Farbe, karten: list[Karte] = []):
@@ -182,6 +183,17 @@ class AnlageStapel(Stapel):
             elif karte.typ.value >= oberste_karte.typ.value or karte.typ.value < oberste_karte.typ.value-1:
                 return False
         return True
+
+    def verschieben_nach(self, zu) -> bool:
+        for idx, s in enumerate(self.karten):
+            if s.aufgedeckt() and zu.anlegbar(s):
+                zuverschieben = self.karten[idx:]
+                behalten = self.karten[0:idx].copy()
+                zu.karten += zuverschieben
+                self.karten = behalten
+                self.aufdecken()
+                return True
+        return False
 
 
 if __name__ == "__main__":

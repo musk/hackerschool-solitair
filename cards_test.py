@@ -171,6 +171,79 @@ class TestAnlageStapel(unittest.TestCase):
             self._assertOrder(anlageStapel[i4])
             idx += 1
 
+    def test_verschieben_auf_leeren_stapel(self):
+        behalten = [Karte(farbe=Farbe.HERZ, typ=KartenTyp.VIER),
+                    Karte(farbe=Farbe.KARO, typ=KartenTyp.DREI),]
+        verschoben = [Karte(farbe=Farbe.PIK, typ=KartenTyp.KOENIG, visible=True),
+                      Karte(farbe=Farbe.HERZ, typ=KartenTyp.DAME, visible=True),
+                      Karte(farbe=Farbe.KREUZ, typ=KartenTyp.BUBE, visible=True),
+                      Karte(farbe=Farbe.KARO, typ=KartenTyp.ZEHN, visible=True),]
+        von = AnlageStapel(karten=behalten+verschoben)
+        zu = AnlageStapel(karten=[])
+        self.assertTrue(von.verschieben_nach(zu))
+        self.assertEqual(behalten, von.karten)
+        self.assertEqual(verschoben, zu.karten)
+        self.assertTrue(von.top().aufgedeckt())
+
+    def test_verschieben_auf_bestehenden_stapel(self):
+        behalten = [Karte(farbe=Farbe.HERZ, typ=KartenTyp.VIER),
+                    Karte(farbe=Farbe.KARO, typ=KartenTyp.DREI),]
+        verschoben = [Karte(farbe=Farbe.PIK, typ=KartenTyp.ACHT, visible=True),
+                      Karte(farbe=Farbe.HERZ, typ=KartenTyp.SIEBEN, visible=True),
+                      Karte(farbe=Farbe.KREUZ, typ=KartenTyp.SECHS, visible=True),
+                      Karte(farbe=Farbe.KARO, typ=KartenTyp.FUENF, visible=True),]
+        exist = [Karte(farbe=Farbe.KREUZ, typ=KartenTyp.BUBE, visible=False),
+                 Karte(farbe=Farbe.PIK,
+                       typ=KartenTyp.AS, visible=False),
+                 Karte(farbe=Farbe.PIK, typ=KartenTyp.ZEHN),
+                 Karte(farbe=Farbe.HERZ, typ=KartenTyp.NEUN)]
+        von = AnlageStapel(karten=behalten+verschoben)
+        zu = AnlageStapel(karten=exist)
+        self.assertTrue(von.verschieben_nach(zu))
+        self.assertEqual(behalten, von.karten)
+        self.assertEqual(exist+verschoben, zu.karten)
+        self.assertTrue(von.top().aufgedeckt())
+
+    def test_verschieben_partiell_auf_bestehenden_stapel(self):
+        behalten = [Karte(farbe=Farbe.HERZ, typ=KartenTyp.VIER),
+                    Karte(farbe=Farbe.KARO, typ=KartenTyp.DREI),
+                    Karte(farbe=Farbe.PIK, typ=KartenTyp.ACHT, visible=True),
+                    Karte(farbe=Farbe.HERZ, typ=KartenTyp.SIEBEN, visible=True)]
+        verschoben = [Karte(farbe=Farbe.KREUZ, typ=KartenTyp.SECHS, visible=True),
+                      Karte(farbe=Farbe.KARO, typ=KartenTyp.FUENF, visible=True),]
+        exist = [Karte(farbe=Farbe.KREUZ, typ=KartenTyp.BUBE, visible=False),
+                 Karte(farbe=Farbe.PIK,
+                       typ=KartenTyp.AS, visible=False),
+                 Karte(farbe=Farbe.PIK, typ=KartenTyp.ZEHN),
+                 Karte(farbe=Farbe.HERZ, typ=KartenTyp.NEUN),
+                 Karte(farbe=Farbe.KREUZ, typ=KartenTyp.ACHT),
+                 Karte(farbe=Farbe.KARO, typ=KartenTyp.SIEBEN)]
+        von = AnlageStapel(karten=behalten+verschoben)
+        zu = AnlageStapel(karten=exist)
+        self.assertTrue(von.verschieben_nach(zu))
+        self.assertEqual(behalten, von.karten)
+        self.assertEqual(exist+verschoben, zu.karten)
+        self.assertTrue(von.top().aufgedeckt())
+
+    def test_verschieben_hinterlaest_leeren_stapel(self):
+        behalten = []
+        verschoben = [Karte(farbe=Farbe.PIK, typ=KartenTyp.ACHT, visible=True),
+                      Karte(farbe=Farbe.HERZ, typ=KartenTyp.SIEBEN, visible=True),
+                      Karte(farbe=Farbe.KREUZ, typ=KartenTyp.SECHS, visible=True),
+                      Karte(farbe=Farbe.KARO, typ=KartenTyp.FUENF, visible=True),]
+        exist = [Karte(farbe=Farbe.KREUZ, typ=KartenTyp.BUBE, visible=False),
+                 Karte(farbe=Farbe.PIK,
+                       typ=KartenTyp.AS, visible=False),
+                 Karte(farbe=Farbe.PIK, typ=KartenTyp.ZEHN),
+                 Karte(farbe=Farbe.HERZ, typ=KartenTyp.NEUN)]
+        von = AnlageStapel(karten=behalten+verschoben)
+        zu = AnlageStapel(karten=exist)
+        self.assertTrue(von.verschieben_nach(zu))
+        self.assertEqual(behalten, von.karten)
+        self.assertEqual(exist+verschoben, zu.karten)
+        self.assertTrue(von.leer())
+
+
     def _assertOrder(self, stapel: AnlageStapel) -> None:
         prev_farbe = None
         prev_value = -1
