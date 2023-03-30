@@ -104,10 +104,10 @@ class AsciiKarte(object):
         typ = karte.typ.blatt
         farbe = karte.farbe.blatt
         return """┌────────┐
-│ {0}    {1} │
+│ {0:<2s}   {1} │
 │        │
 │        │
-│ {1}    {0} │
+│ {1}   {0:>2s} │
 └────────┘""".format(typ, farbe)
 
     @classmethod
@@ -138,7 +138,7 @@ if __name__ == "__main__":
         Karte(farbe=Farbe.PIK, typ=KartenTyp.ZWEI),
         Karte(farbe=Farbe.KREUZ, typ=KartenTyp.AS),
         Karte(farbe=Farbe.HERZ, typ=KartenTyp.DAME),
-        Karte(farbe=Farbe.KREUZ, typ=KartenTyp.FUENF),
+        Karte(farbe=Farbe.KREUZ, typ=KartenTyp.ZEHN),
         Karte(farbe=Farbe.KARO, typ=KartenTyp.DAME),
         Karte(farbe=Farbe.PIK, typ=KartenTyp.FUENF, visible=True),
         Karte(farbe=Farbe.KARO, typ=KartenTyp.VIER, visible=True),

@@ -44,6 +44,7 @@ class KartenTyp(Enum):
     SIEBEN = 7, "7"
     ACHT = 8, "8"
     NEUN = 9, "9"
+    ZEHN = 10, "10"
     BUBE = 10, "B"
     DAME = 10, "D"
     KOENIG = 10, "K"
