@@ -28,7 +28,7 @@ To move the cards form A5 to A1-4 the player has to go through the stacks S0-S6.
                          └──┘ |S6│
                               └──┘
                              
-──────────────────────────────────                                                                                   
+────────────────────────────────── 
 Menü
 </pre>
 The player has the option to either move a card form A5 or S0-6 to the decks A1-4 as long as they are of the correct suite can be applied according to order. The order of the decks A1-A4 is ascending. 
