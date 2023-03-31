@@ -3,6 +3,12 @@ from ascii import AsciiScreen, AsciiKarte, AsciiStapel
 
 
 class Solitair(object):
+    """
+    Basis Klasse für Solitär
+
+    Die Klasse initialsiert alle wichtigen elemente und startet das spiel mit play()
+    """
+
     SOLITAIR = """
         ███████╗ ██████╗ ██╗     ██╗████████╗ █████╗ ██╗██████╗                       
         ██╔════╝██╔═══██╗██║     ██║╚══██╔══╝██╔══██╗██║██╔══██╗                      
@@ -20,6 +26,15 @@ class Solitair(object):
                 "b": {"text": "[b]eenden", "method": f"self._end()"}, }
 
     def __init__(self) -> None:
+        '''
+        Der Konstruktor für die Klasse Solitair. Im Konstruktor werden die verschiedenen Spielelemente
+        erzeugt. 
+        1. Der Stapel von dem Karten gezogen werden 
+        2. Die Ablagestapel wo die Karten final abgelegt werden
+        3. Die 7 Anlagestapel wo die Karten während des Spiels sortiert werden
+        4. Der AsciiScreen auf den das Spielfeld dargestellt wird
+        5. Das Menü und die Navigationshilfen um das Spiel zu bedienen
+        '''
         self.ziehStapel = Stapel(karten=[Karte(col, type) for col in list(Farbe)
                                          for type in list(KartenTyp)], ablage=True)
         self.ziehStapel.shuffle()
@@ -37,6 +52,12 @@ class Solitair(object):
         self.status_msg = ""
 
     def _initAnlage(self, kartenZiehen: int) -> list[Karte]:
+        """
+        Hilfs methode um die Anlagestapel zu initialisieren.
+        Die methode zieht die angegebenen Anzahl von Karten vom Stapel und gibt sie als list[Karte] zurück.
+        
+        kartenZiehen - int die Anzahl der verdeckten Karten die zurückgegeben werden
+        """
         karten = []
         for i in range(kartenZiehen):
             karten.append(self.ziehStapel.ziehen())
@@ -44,7 +65,13 @@ class Solitair(object):
                 karten[i].aufdecken()
         return karten
 
-    def _draw(self):
+    def _draw(self) -> None:
+        """
+        Malt das Spielfeld in dem es die notwendigen Ascii zeichen auf den AsciiScreen schreibt und anschliessend
+        print aufruft. 
+
+        Siehe auch self.write_to_screen()
+        """
         for idx, a in enumerate([self.ablageHerz,
                                  self.ablageKaro,
                                  self.ablagePik,
@@ -73,7 +100,10 @@ class Solitair(object):
             self.status_msg, 2, AsciiKarte.height()*2 + 27)
         self.screen.print()
 
-    def _menu(self):
+    def _menu(self) -> str:
+        """
+        Generiert das Menü, dass in self.COMMANDS definiert ist. 
+        """
         menu = "".join(["─" for i in range(self.screen.width)]) + "\n"
         idx = 1
         for cmd in [v["text"] for k, v in self.COMMANDS.items()]:
@@ -84,6 +114,10 @@ class Solitair(object):
         return menu
 
     def _input(self):
+        """
+        Verarbeitet die Menüeingaben. Die Eingabe wird gegen self.COMMANDOS geprüft. Wird das Kommando 
+        gefunden wird die hinterlegte methode ausgeführt. Ansonsten wird eine Fehlermeldung ausgegeben.
+        """
         eingabe: str = input("Option: ").lower().strip()
         if eingabe in self.COMMANDS:
             exec(self.COMMANDS[eingabe]["method"])
@@ -92,9 +126,20 @@ class Solitair(object):
                 f"Ungültige eingabe: {eingabe}! Bitte wählen sie eine gültige Option.")
 
     def _write_message(self, text: str):
+        """
+        Speichert die angegebene Status message in den internen Puffer. Beim nächste aufruf von print wird die 
+        Statusnachricht angzeigt.
+        text - str die Statusnachricht
+        """
         self.status_msg = text
 
     def _get_number(self, msg: str, range: range) -> int:
+        """
+        Fragt den user nach einer nummerischen Eingabe. 
+        Die Frage wird so lange wiederholt bis die Eingabe valide ist.
+        msg - str  die Frage für die Eingabe
+        range - range das Intervall in dem sich die Eingabe befinden muss. Das obere Ende der Range is exklusive
+        """
         num = ""
         while True:
             num = input(msg).strip()
@@ -105,16 +150,27 @@ class Solitair(object):
                 self._draw()
 
     def _show_navigation(self, withAblage=False):
+        """
+        Setzt navigation flag auf True so dass die Eingabehilfe beim nächsten screen.print() mit angezeigt wird
+        withAblage - bool sagt ob die Navigationshilfe für den Ablagestapel ebenfalls angezeigt werden soll
+        """
         self.navigation_anlage = True
         if withAblage:
             self.navigation_ablage = True
         self._draw()
 
     def _hide_navigation(self):
+        """
+        Setzt das Navigationsflag auf False so dass die Eingabehilfe beim naächen screen.print() nicht mehr angezeigt wird. 
+        """
         self.navigation_anlage = False
         self.navigation_ablage = False
 
     def _end(self):
+        """
+        Method wird aufgerufen wenn der beenden Menüpunkt gewählt wird.
+        Die Methode gibt den Endscreen aus und beendet dann das Programm mit exit(0)
+        """
         self.screen.clear_screen()
         self.screen.write_to_screen(self.SOLITAIR + """  
                 Danke das sie Solitair gespielt haben!              
@@ -123,6 +179,11 @@ class Solitair(object):
         exit(0)
 
     def _umdrehen(self):
+        """
+        Die Methode wird aufgerufen wenn der umdrehen Menüpunkt ausgewählt wird. 
+        Zunächst wird gepräft ob der Ziehstapel leer ist und falls ja werden die Karten 
+        auf dem Ablagestapel neugemischt und verdeckt auf den Ziehstapel abgelegt.
+        """
         if self.ziehStapel.leer():
             k = self.ablageStapel.ziehen()
             while k:
@@ -134,11 +195,24 @@ class Solitair(object):
                 "Umdrehen nicht möglich, es sind noch Karten auf dem Stapel!")
 
     def _ziehen(self):
+        """
+        Die Method wird aufgerufen wenn der ziehen Menüpunkt ausgewählt wird.
+        Es wird eine Karte vom Stapel gezogen und auf den Ablagestapel gelegt. 
+        """
         k = self.ziehStapel.ziehen()
         if k:
             self.ablageStapel.anlegen(k.aufdecken())
 
     def _ablegen(self):
+        """
+        Die Methode wird aufgerufen wenn der ablegen Menüpunkt ausgewählt wird. 
+        Die Method 
+        * zeigt zunächst das Navigationshilemenü
+        * dann fragt es nach dem Stapel von dem die Karte genommen werden soll
+        * dann wird überprüft ob die Karte tatsächlich abgelegt werden kann
+            * wenn nein dann wird eine Fehlernachricht angezeigt und der Vorgan abgebrochen
+            * wenn ja dann wird die Karte auf dem entsprechenden Ablagestapel abgelegt
+        """
         self._show_navigation(withAblage=True)
         idx = self._get_number(
             "Welchen Stapel möchten sie ablegen? ", range(0, len(self.anlageStapel)+1))
@@ -162,6 +236,15 @@ class Solitair(object):
             self._write_message(msg)
 
     def _anlegen(self):
+        """
+        Die Method wird aufgerufen wenn der anlege Menüpunkt ausgwählt wird.
+        Die Method
+        * zeigt das Navigationshilfemenü an
+        * Fragt dann nach dem Anlagestapel an den angelegt werden soll
+        * Überprüft dann ob die Karte angelegt werden kann
+            * wenn ja dann wir die Karte vom Ablagestapel genommen und angelegt
+            * wenn nein wird eine Fehlermeldung angezeigt und der Vorgang abgebrochen
+        """
         k = self.ablageStapel.top()
         if k:
             self._show_navigation(withAblage=False)
@@ -177,6 +260,16 @@ class Solitair(object):
                     f"Karte {k.farbe.blatt} {k.typ.blatt} kann nicht an Stapel [{idx}] angelegt werden!")
 
     def _verschieben(self):
+        """
+        Die Method wird aufgerufen wenn der verschieben Menüpunkt ausgwählt wird.
+        Die Method
+        * zeigt das Navigationshilfemenü an
+        * Fragt nach von welchem Stapel Karten verschoben werden sollen
+        * Fragt nach zu welchen Stapel die Karten verschoben werden sollen
+        * Versucht dann die Karten mit Stapel.verschieben_nach(zielStapel) zu verschieben
+            * wenn das klappt werden die Karten verschoben
+            * wenn nicht dann wird eine Fehlermeldung angezeigt und der Vorgang wird abgebrochen
+        """
         self._show_navigation(withAblage=False)
         von = self._get_number(f"Von welchem Stapel wollen sie Karten verschieben? ",
                                range(0, len(self.anlageStapel)))
@@ -194,9 +287,16 @@ class Solitair(object):
             self._write_message("")
 
     def _gewonnen(self):
+        """
+        Überprüft ob das Spiel gewonnen ist. 
+        Wenn alle Ablagestapel komplett sind wird True zurückgegeben ansonsten False.
+        """
         return self.ablageHerz.komplett() and self.ablageKaro.komplett() and self.ablageKreuz.komplett() and self.ablagePik.komplett()
 
     def _draw_welcome(self):
+        """
+        Zeigt den Welcome Screen für das Spiel an.
+        """
         self.screen.clear_screen()
         self.screen.write_to_screen(self.SOLITAIR + """  
                      Drücke Enter um fortzufahren                   
@@ -204,6 +304,9 @@ class Solitair(object):
         self.screen.print()
 
     def _draw_gewonnen(self):
+        """
+        Zeigt den Sieger Screen für das Spiel an. 
+        """
         self.screen.clear_screen()
         self.screen.write_to_screen("""
         ███████╗ ██████╗ ██╗     ██╗████████╗ █████╗ ██╗██████╗ 
@@ -225,6 +328,20 @@ class Solitair(object):
         self.screen.print()
 
     def play(self):
+        """
+        Methode führt das Spiel aus. 
+        * zuerst wird der Willkommens Screen angezeigt
+        * dann wird das Spielfeld angezeigt
+        * als nächstes wird die Spielschleife gestartet die solange läuft bis das Spiel 
+          gewonnen wurde oder der Benutzer das Spiel beendet
+        * Die Spielschleife führt folgende Kommandos der Reiche nach aus:
+            * Zunächst wird der Statusnachrichtenpuffer gelöscht
+            * Dann wird die Eingabe des Spielers verarbeitet
+            * Anschliessend wird der Bildschirm gelöscht 
+            * um dann den neuen Zustand des Spiels anzuzeigen
+        * wenn die Schleife durch einen Sieg beendet wird wird der Siegerbildschirm angezeigt
+        * und das Spiel beendet
+        """
         self._draw_welcome()
         input()
         self.screen.clear_screen()
@@ -239,13 +356,6 @@ class Solitair(object):
         input()
 
 
-def main():
-    '''
-    The enty program for the solitair program
-    '''
+if __name__ == "__main__":
     s = Solitair()
     s.play()
-
-
-if __name__ == "__main__":
-    main()
