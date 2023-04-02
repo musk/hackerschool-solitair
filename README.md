@@ -1,69 +1,27 @@
 # Solitair
-This project developes a game of Solitair. It is meant as the srouce for a coure developed for the hackerschool (https://hacker-school.de) to introduce Object Oriented Programming using Python. 
-The game is solely based on a terminal and only requires a python 3.9 or higher installation to run. No additional external dependencies are necessary.
+Bei diesem Projekt handelt es sich um das Spiel Solitair. Das Projekt ist als Basis für einen Pythonkurs für die Hackerschool (https://hacker-school.de)  gedacht um das Konzept von Klassen und Objekten näher zu bringen.
 
-To run the game simply run 
+Das Spiel nutzt Python 3.9 und lediglich die Standardpythonbibliotheken um die Abhängigkeiten auf ein Minimum zu halten. Es nutzt ein standard Terminal um das Spielfeld zu zeichnen. 
+Alle notwendigen Klassen werden mit dem Spiel geliefert. 
+
+Um das Spiel zu starten führen sie
 ```shell
 python solitair.py
 ```
+aus
 
+## Spielregeln
+Die Spielregeln kannst du unter [SPIELREGELN.md](SPIELREGELN.md) nachlesen. 
 
-## Gameplay
-Solitair is a single player game where user needs to move all cards from deck A5 to the decks A1-4. Where each deck A1-4 must contain a complete suite diamonds, hearts, spades and clubs. Each complete suite consists of the cards in order Ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen and King.  
+## Struktur
+Der Code ist in 3 Module aufgeteilt:
+* solitair.py - beinhaltet die Hautpklasse des Spiels und den einstiegs Punkt um das Spiel zu starten.
+* cards.py - beinhaltet alle Klassen rundum Karten und Stapeln.
+* ascii.py - beinhaltet alle Klassen rundum die grafische Darstellung .
 
-To move the cards form A5 to A1-4 the player has to go through the stacks S0-S6. At the beginning of the game each stack contains a set of cards (as shown) with the top card being displayed. 
+Zusätzlich gibt es noch Klassen zum testen der Funktionalität:
+* cards_test.py - alle Unit Tests für das cards.py Modul
+* solitair_test.py - Unit Test für das solitair.py Modul
 
-<pre>
-┌──┐ ┌──┐ ┌──┐ ┌──┐      ┌──┐ ┌──┐
-│A1│ │A2│ │A3│ │A4│      │A5│ │  │
-└──┘ └──┘ └──┘ └──┘      └──┘ └──┘
- 
-┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐
-│S0│ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐
-└──┘ │S1│ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐
-     └──┘ │S2│ ┌──┐ ┌──┐ ┌──┐ ┌──┐
-          └──┘ │S3│ ┌──┐ ┌──┐ ┌──┐
-               └──┘ │S4│ ┌──┐ ┌──┐
-                    └──┘ │S5│ ┌──┐
-                         └──┘ |S6│
-                              └──┘
-                             
-────────────────────────────────── 
-Menü
-</pre>
-The player has the option to either move a card form A5 or S0-6 to the decks A1-4 as long as they are of the correct suite can be applied according to order. The order of the decks A1-A4 is ascending. 
-
-Or he can add a card to the stack S0-6 as long as the card has an alternate color to the top most card and its value is the next lower value in the order of the suite.
-
-Example:
-<pre>
- Before    After      
-┌──┐┌──┐   ┌──┐                                  
-│♥8│|♠7|   │♥8│   
-└──┘└──┘   ┌──┐ 
-           |♠7|
-           └──┘
-</pre>
-The player can also move cards from one of the stacks S0-6 to another stack as long as the upper most card of the moved cards can be applied to the tagert stack. This is the case if it has an alternate color and its value is the next lower value in the order of a suite. 
-
-Example: Moving from S3 to S0
-<pre>
- Before      After
-
- S0  S3      S0  S3 
-┌──┐┌──┐    ┌──┐┌──┐                 
-┌──┐┌──┐    ┌──┐┌──┐      
-┌──┐┌──┐    ┌──┐┌──┐      
-┌──┐┌──┐    ┌──┐|  |                                 
-│♥8│|♠7|    |♥8│└──┘                                  
-└──┘┌──┐    ┌──┐                                 
-    │♦6|    │♦7|                                 
-    ┌──┐    ┌──┐                                 
-    │♣5|    │♦6|                                 
-    └──┘    ┌──┐
-            |♣5|
-            └──┘                           
-</pre>
-The game is one if all cards are on the decks A1-4
 
 
