@@ -57,7 +57,7 @@ class Solitair(object):
         Hilfs methode um die Anlagestapel zu initialisieren.
         Die methode zieht die angegebenen Anzahl von Karten vom Stapel und gibt sie als list[Karte] zurück.
 
-        kartenZiehen - int die Anzahl der verdeckten Karten die zurückgegeben werden
+        kartenZiehen - `int` die Anzahl der verdeckten Karten die zurückgegeben werden
         """
         karten = []
         for i in range(kartenZiehen):
@@ -130,7 +130,8 @@ class Solitair(object):
         """
         Speichert die angegebene Status message in den internen Puffer. Beim nächste aufruf von print wird die 
         Statusnachricht angzeigt.
-        text - str die Statusnachricht
+
+        text - `str` die Statusnachricht
         """
         self.status_msg = text
 
@@ -138,8 +139,9 @@ class Solitair(object):
         """
         Fragt den user nach einer nummerischen Eingabe. 
         Die Frage wird so lange wiederholt bis die Eingabe valide ist.
-        msg - str  die Frage für die Eingabe
-        range - range das Intervall in dem sich die Eingabe befinden muss. Das obere Ende der Range is exklusive
+
+            msg - `str`  die Frage für die Eingabe
+          range - `range` das Intervall in dem sich die Eingabe befinden muss. Das obere Ende der Range is exklusive
         """
         num = ""
         while True:
@@ -153,7 +155,8 @@ class Solitair(object):
     def _show_navigation(self, withAblage=False):
         """
         Setzt navigation flag auf True so dass die Eingabehilfe beim nächsten screen.print() mit angezeigt wird
-        withAblage - bool sagt ob die Navigationshilfe für den Ablagestapel ebenfalls angezeigt werden soll
+
+        withAblage - `bool` sagt ob die Navigationshilfe für den Ablagestapel ebenfalls angezeigt werden soll
         """
         self.navigation_anlage = True
         if withAblage:
@@ -296,7 +299,9 @@ class Solitair(object):
 
     def _ja_nein_frage(self, frage: str) -> bool:
         """
-        Stellt die Ja-Nein-Frage `frage` und gibt `True` zurück wenn der User mit Ja antwortet ansonsten `False`
+        Stellt die Ja-Nein-Frage `frage` und gibt `True` zurück wenn der User mit Ja antwortet ansonsten `False`.
+
+        frage - `str` Die Ja-Nein-Frage die gestellt werden soll.
         """
         while True:
             eingabe = input(f"{frage} (j/n)")

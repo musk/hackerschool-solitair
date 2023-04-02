@@ -66,9 +66,10 @@ class Karte(object):
         """
         Erstellt eine Spielkarte mit der angegebenen Frabe und dem angegebenen Kartentyp 
         und ob sie offen oder zugedeckt ist
-        farbe - Farbe die Farbe der Karte 
-        typ - KartenTyp der Wert der Karte
-        visible - Ob die Karte offen oder zugedeckt ist
+
+        farbe - `Farbe` die Farbe der Karte 
+        typ - `KartenTyp` der Wert der Karte
+        visible - `bool` Ob die Karte offen oder zugedeckt ist
         """
         self.farbe = farbe
         self.typ = typ
@@ -92,53 +93,63 @@ class Karte(object):
         die Karte `other` ansonsten `False.` 
         Zwei Karten gelten als gleich wenn sie beide vom Type Karte sind 
         und die gleiche Farbe wie auch den gleichen Wert haben.
-        other - object Das Objekt mit dem diese Karte verglichen wird 
+        
+        other - `object` das Objekt mit dem verglichen wird 
         """
         if type(other) == Karte:
             return self.farbe == other.farbe and self.typ == other.typ
         return False
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: object) -> bool:
         """
         Gibt `True` zurück wenn der Farbwert und Wert dieser Karte Kleiner ist als 
         die der Karte `other` ansonsten `False.`
-        other - object Objekt mit dem verglichen wird.
+        
+        other - `object` das Objekt mit dem verglichen wird
         """
         if self.farbe == other.farbe:
             return self.typ.value < other.typ.value
         return self.farbe.value < other.farbe.value
 
-    def __le__(self, other) -> bool:
+    def __le__(self, other: object) -> bool:
         """
         Gibt `True` zurück wenn der Farbwert und Wert dieser Karte kleiner oder gleich 
         ist als die der Karte `other` ansonsten `False.`
+
+        other - `object` das Objekt mit dem verglichen wird
         """
         if self.farbe == other.farbe:
             return self.typ.value <= other.typ.value
         return self.farbe.value <= other.farbe.value
 
-    def __gt__(self, other) -> bool:
+    def __gt__(self, other: object) -> bool:
         """
         Gibt `True` zurück wenn der Farbwert und Wert dieser Karte größer ist als 
         die der Karte `other` ansonsten `False.`
+
+        other - `object` das Objekt mit dem verglichen wird
         """
         if self.farbe == other.farbe:
             return self.typ.value > other.typ.value
         return self.farbe.value > other.farbe.value
 
-    def __ge__(self, other) -> bool:
+    def __ge__(self, other: object) -> bool:
         """
         Gibt `True` zurück wenn der Farbwert und Wert dieser Karte größer oder gleich 
         ist als die der Karte `other` ansonsten `False.`
+
+        other - `object` das Objekt mit dem verglichen wird
         """
         if self.farbe == other.farbe:
             return self.typ.value >= other.typ.value
         return self.farbe.value >= other.farbe.value
 
-    def __ne__(self, other) -> bool:
+    def __ne__(self, other: object) -> bool:
         """
         Gibt an ob diese Karte ungleich Karte `other` ist.
         Diese Methode ist equivalent mit not self.__eq__(other)
+
+        other - `object` das Objekt mit dem verglichen wird
         """
         return not self.__eq__(other)
 
@@ -168,10 +179,9 @@ class Stapel(object):
     def __init__(self, karten: list[Karte] = []):
         """
         Erzeugt einen Kartenstapel bestehend aus den angegebenen Karten `karten`. 
-        karte   - list[Karte] die Karten auf dem Stapel. 
-                  Default: []
-        ablage  - bool gibt an ob Karten auf diesen Stapel abgelegt werden können. 
-                  Default: True
+        
+        karten - `list[Karte]` die Karten auf dem Stapel. 
+                 Default: []
         """
         self.karten = karten.copy()
 
@@ -209,7 +219,8 @@ class Stapel(object):
         """
         Legt Karte `karte` an diesen Stapel an wenn `self.anlegbar(karte)` `True` zurück gibt
         ansonsten wird ein `ValueError` geschmissen. 
-        karte - Karte die Karte die angelegt wird 
+        
+        karte - `Karte` die Karte die angelegt wird 
         """
         if not self.anlegbar(karte):
             raise ValueError(
@@ -220,12 +231,15 @@ class Stapel(object):
         """
         Gibt `True` zurück wenn Karte `karte` an diesen Stapel angelegt werden kann 
         ansonsten `False`.
+        
+        karte - `Karte` die zu prüfende Karte
         """
         return True
 
     def shuffle(self):
         """
-        Mischt diesen Stapel
+        Mischt diesen Stapel.
+        Gibt den Stapel selbst zurück.
         """
         shuffle(self.karten)
         return self
@@ -256,7 +270,14 @@ class AblageStapel(Stapel):
 
     def anlegbar(self, karte) -> bool:
         """
-        :karte Karte: prüft ob karte auf dem Stapel abgelegt werden kann
+        Prüft ob die Karte `karte` auf diesem AblageStapel abgelegt werden kann. 
+        Gibt `True` zurück wenn
+        * die Karte hat die selbe Farbe wie der AblageStapel
+        * der Wert der Karte passt nach der Reihenfolge As,2,3,4,5,6,7,8,9,10,Bube,Dame und König als nächstes auf den Stapel. 
+          Das As kann auf einen leeren Stapel abgelegt werden.
+        ansonsten `False`
+
+        karte - `Karte` die Karte die geprüft wird.
         """
         if karte.farbe != self.farbe:
             return False
@@ -270,6 +291,9 @@ class AblageStapel(Stapel):
         return karte == nextKarte
 
     def komplett(self) -> bool:
+        """
+        Gibt `True` zurück wenn der AblageStapel komplett ist ansonsten `False`
+        """
         return len(self.karten) == len(list(KartenTyp))
 
 
@@ -285,6 +309,8 @@ class AnlageStapel(Stapel):
                   Karte und der Wert der Karte ist um eins niedriger als 
                   der Wert der obersten Karte
         ansonsten `False`.
+
+        karte - `Karte` die zuprüfende Karte
         """
         if len(self.karten) <= 0:
             if karte.typ != KartenTyp.KOENIG:
@@ -304,7 +330,9 @@ class AnlageStapel(Stapel):
             Der Stapel wird von unten nach oben Karte um Karte durchlaufen wenn die Karte aufgedeckt 
             und anlegbar ist werden die Karte und alle folgenden Karten auf den `zu` Stapel verschoben.
             Wird keine Karte gefunden die anlegbar ist werden keine Karten verschoben.
-        Gibt `True` zurück wenn Karten verschoben wurden ansonsten `False`. 
+        Gibt `True` zurück wenn Karten verschoben wurden ansonsten `False`.
+
+        zu - `AnlageStapel` auf den die Karten verschoben werden sollen 
         """
         for idx, s in enumerate(self.karten):
             if s.aufgedeckt() and zu.anlegbar(s):

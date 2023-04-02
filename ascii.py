@@ -5,16 +5,17 @@ from time import sleep
 class AsciiScreen(object):
     """
     Die Klasse definiert einen zeichenbaren Bildschirm im Terminal. 
-    Der Bildschirm kann dann vorbereitet werden und mittels print 
+    Der Bildschirm kann dann vorbereitet werden und mittels `print()` 
     im Terminal ausgegeben werden. 
     """
 
     def __init__(self, width: int = 90, height: int = 35):
         """
         Erstellt einen AsciiScreen mit der Breite `width` und der Höhe `height`
-        width   - int die Breite des Bildschirms
+
+        width   - `int` die Breite des Bildschirms
                   Default: 90
-        height  - int die Höhe des Bildschirms
+        height  - `int` die Höhe des Bildschirms
                   Default: 35
         """
         self.width = width
@@ -25,7 +26,7 @@ class AsciiScreen(object):
     def _update_buffer(self) -> str:
         """
         Beschreibt den internen Puffer mit dem aktuellen Inhalt des Bildschirms
-        Gibt den internen Puffer als str zurück. 
+        Gibt den internen Puffer als `str` zurück. 
         """
         result = ""
         for y in range(self.height):
@@ -37,7 +38,7 @@ class AsciiScreen(object):
 
     def clear_screen(self):
         """
-        Löscht den Inhalt des Bildschirms in demm alle Zeichen mit ' ' ersetzt werden.
+        Löscht den Inhalt des Bildschirms in dem alle Zeichen mit ' ' ersetzt werden.
         """
         self.screen = [" " for t in range(0, self.width*self.height)]
 
@@ -47,9 +48,10 @@ class AsciiScreen(object):
         Zum anzeigen des textes muss `self.print()` aufgerufen werden. 
         Die Zeichen werden mittels `for ch in text` in den internen Puffer übertragen 
         und daher werden nur einzeln kodierte Zeichen unterstützt. 
-         text - Der auszugebende Text 
-            x - int x-Koordinate wo der Text dargestellt wird
-            y - int y-Koordinate wo der Text dargestellt wird
+
+         text - `str` Der auszugebende Text 
+            x - `int` x-Koordinate wo der Text dargestellt wird
+            y - `int` y-Koordinate wo der Text dargestellt wird
         """
         if x not in range(0, self.width):
             raise ValueError(f"x ist nicht im Bereich [{0},{self.width}[")
@@ -83,28 +85,33 @@ class AsciiScreen(object):
 
 class AsciiStapel(Stapel):
     """
-    Die Klasse definiert Methoden mit denen eine Stapel auf einem 
+    Die Klasse definiert Methoden mit denen ein Stapel auf einem 
     Terminal gezeichnet werden können.
     """
 
     def __init__(self, karten: list[Karte] = []):
         """
-        Erstellt einen AsciiStapel der den angegebenen `stapel` darstellt.
-        stapel - Stapel der darzustellende Stapel
+        Erstellt einen AsciiStapel mit den angegebenen Karten `karten`.
+
+        karten - `list[Karte]` die Karten die auf dem Stapel liegen
+                 Default: []
         """
         super().__init__(karten)
 
     def width(self) -> int:
         """
-        Gibt die Breite des Stapels als int zurück.
+        Gibt die Breite des Stapels als `int` zurück.
         """
         return AsciiKarte.width()
 
     def height(self, fanned: bool = True) -> int:
         """
-        Gibt die Höhe des Stapels zurück.
+        Gibt die Höhe des Stapels als `int` zurück.
         Wenn `fanned` `True` ist dann wird die Höhe in gefächerter 
         Form dargegeben ansonsten entspricht die Höhe einer einzelnen Karte.
+
+        fanned - `bool` `True` wenn der Stapel gefächert dargestellt werden soll 
+                 `False` wenn nicht.
         """
         if fanned:
             return len(self.karten)-1 * 2 + AsciiKarte.height()
@@ -172,6 +179,7 @@ class AsciiKarte(object):
         Gibt die Karte `karte` als `str` zurück. Wenn die Karte
         aufgedeckt ist wird `self.front(karte)` aufgerufen ansonsten 
         wird `self.back()` aufgerufen.
+        
         karte - Karte die darzustellende Karte
         """
         blatt = ""
@@ -187,6 +195,7 @@ class AsciiKarte(object):
     def front(self, karte: Karte) -> str:
         """
         Gibt Vorderseite der Karte `karte` als `str` zurück.
+        
         karte - Karte die darzustellende Karte
         """
         typ = karte.typ.blatt
