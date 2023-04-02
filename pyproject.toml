@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "solitair"
-version = "0.1.0"
+version = "0.9.0"
 description = "A simple solitair program to teach python"
 authors = ["Stefan Langer <mailtolanger@gmail.com>"]
 license = "MIT License"
