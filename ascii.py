@@ -1,13 +1,15 @@
 from cards import Karte, Farbe, KartenTyp, Stapel
 from time import sleep
 
+
 class AsciiScreen(object):
     """
     Die Klasse definiert einen zeichenbaren Bildschirm im Terminal. 
     Der Bildschirm kann dann vorbereitet werden und mittels print 
     im Terminal ausgegeben werden. 
     """
-    def __init__(self, width=90, height=35):
+
+    def __init__(self, width: int = 90, height: int = 35):
         """
         Erstellt einen AsciiScreen mit der Breite `width` und der Höhe `height`
         width   - int die Breite des Bildschirms
@@ -49,7 +51,10 @@ class AsciiScreen(object):
             x - int x-Koordinate wo der Text dargestellt wird
             y - int y-Koordinate wo der Text dargestellt wird
         """
-        # TODO check that x y are within limits
+        if x not in range(0, self.width):
+            raise ValueError(f"x ist nicht im Bereich [{0},{self.width}[")
+        if y not in range(0, self.height):
+            raise ValueError(f"y ist nicht im Bereich [{0},{self.height}[")
         # initialize start coordinates
         _x = x
         _y = y
@@ -81,6 +86,7 @@ class AsciiStapel(object):
     Die Klasse definiert Methoden mit denen eine Stapel auf einem 
     Terminal gezeichnet werden können.
     """
+
     def __init__(self, stapel: Stapel):
         """
         Erstellt einen AsciiStapel der den angegebenen `stapel` darstellt.
@@ -233,7 +239,7 @@ if __name__ == "__main__":
         Karte(farbe=Farbe.KREUZ, typ=KartenTyp.DREI, visible=True),
         Karte(farbe=Farbe.HERZ, typ=KartenTyp.ZWEI, visible=True)
     ]))
-    for i in range(0,11):
+    for i in range(0, 11):
         screen.write_to_screen(stapel.printFanned(), 0, 0)
         screen.print()
         stapel.stapel.ziehen()
