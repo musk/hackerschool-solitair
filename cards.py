@@ -165,7 +165,7 @@ class Karte(object):
 
 
 class Stapel(object):
-    def __init__(self, karten: list[Karte] = []) -> None:
+    def __init__(self, karten: list[Karte] = []):
         """
         Erzeugt einen Kartenstapel bestehend aus den angegebenen Karten `karten`. 
         karte   - list[Karte] die Karten auf dem Stapel. 
@@ -235,11 +235,17 @@ class Stapel(object):
         Gibt `True` zurück wenn der Stapel leer ist ansonsten `False`
         """
         return len(self.karten) == 0
+    
+    def karten_anzahl(self) -> int:
+        """
+        Gibt die Anzahl der Karten auf dem Stapel als `int` zurück.
+        """
+        return len(self.karten)
 
 
 class AblageStapel(Stapel):
     def __init__(self, farbe: Farbe, karten: list[Karte] = []):
-        Stapel.__init__(self, karten)
+        super().__init__(karten)
         self.farbe = farbe
 
     def __repr__(self) -> str:
@@ -268,6 +274,9 @@ class AblageStapel(Stapel):
 
 
 class AnlageStapel(Stapel):
+    def __init__(self, karten: list[Karte] = []):
+        super().__init__(karten)
+
     def anlegbar(self, karte) -> bool:
         """
         Gibt `True` zurück wenn Karte `karte` die Bedinungen erfüllt:

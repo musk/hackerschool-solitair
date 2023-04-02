@@ -21,6 +21,7 @@ class Solitair(object):
     COMMANDS = {"z": {"text": "[z]iehen", "method": f"self._ziehen()"},
                 "a": {"text": "[a]nlegen", "method": f"self._anlegen()"},
                 "l": {"text": "ab[l]egen", "method": f"self._ablegen()"},
+                "m": {"text": "neu [m]ischen", "method": f"self._neu_mischen()"},
                 "v": {"text": "[v]erschieben", "method": f"self._verschieben()"},
                 "u": {"text": "[u]mdrehen", "method": f"self._umdrehen()"},
                 "b": {"text": "[b]eenden", "method": f"self._end()"}, }
@@ -36,26 +37,26 @@ class Solitair(object):
         5. Das Menü und die Navigationshilfen um das Spiel zu bedienen
         '''
         self.ziehStapel = Stapel(karten=[Karte(col, type) for col in list(Farbe)
-                                         for type in list(KartenTyp)], ablage=True)
+                                         for type in list(KartenTyp)])
         self.ziehStapel.shuffle()
         self.ablageStapel = Stapel()
         self.ablageHerz = AblageStapel(farbe=Farbe.HERZ)
         self.ablageKaro = AblageStapel(farbe=Farbe.KARO)
         self.ablageKreuz = AblageStapel(farbe=Farbe.KREUZ)
         self.ablagePik = AblageStapel(farbe=Farbe.PIK)
-        self.anlageStapel = [AsciiStapel(AnlageStapel(
-            karten=self._initAnlage(i+1))) for i in range(7)]
         self.screen = AsciiScreen(width=74, height=AsciiKarte.height()*2 + 33)
         self.navigation = False
         self.navigation_anlage = False
         self.navigation_ablage = False
         self.status_msg = ""
+        self.anlageStapel = [AsciiStapel(karten=self._initAnlage(i+1))
+                             for i in range(7)]
 
     def _initAnlage(self, kartenZiehen: int) -> list[Karte]:
         """
         Hilfs methode um die Anlagestapel zu initialisieren.
         Die methode zieht die angegebenen Anzahl von Karten vom Stapel und gibt sie als list[Karte] zurück.
-        
+
         kartenZiehen - int die Anzahl der verdeckten Karten die zurückgegeben werden
         """
         karten = []
@@ -218,7 +219,7 @@ class Solitair(object):
             "Welchen Stapel möchten sie ablegen? ", range(0, len(self.anlageStapel)+1))
         self._hide_navigation()
         if idx < len(self.anlageStapel):
-            stapel = self.anlageStapel[idx].stapel
+            stapel = self.anlageStapel[idx]
         elif idx == len(self.anlageStapel):
             stapel = self.ablageStapel
 
@@ -251,7 +252,7 @@ class Solitair(object):
             idx = self._get_number(f"Wo möchten sie die Karte {k.farbe.blatt} {k.typ.blatt} anlegen? ",
                                    range(0, len(self.anlageStapel)))
             self._hide_navigation()
-            stapel = self.anlageStapel[idx].stapel
+            stapel = self.anlageStapel[idx]
 
             if stapel.anlegbar(k):
                 stapel.anlegen(self.ablageStapel.ziehen())
@@ -278,7 +279,7 @@ class Solitair(object):
         self._draw()
         zu = self._get_number(f"Zu welchem Stapel wollen sie die Karten verschieben? ",
                               range(0, len(self.anlageStapel)))
-        zuStapel = self.anlageStapel[zu].stapel
+        zuStapel = self.anlageStapel[zu]
         self._hide_navigation()
         if not vonStapel.verschieben_nach(zuStapel):
             self._write_message(
@@ -292,6 +293,36 @@ class Solitair(object):
         Wenn alle Ablagestapel komplett sind wird True zurückgegeben ansonsten False.
         """
         return self.ablageHerz.komplett() and self.ablageKaro.komplett() and self.ablageKreuz.komplett() and self.ablagePik.komplett()
+
+    def _ja_nein_frage(self, frage: str) -> bool:
+        """
+        Stellt die Ja-Nein-Frage `frage` und gibt `True` zurück wenn der User mit Ja antwortet ansonsten `False`
+        """
+        while True:
+            eingabe = input(f"{frage} (j/n)")
+            if eingabe.lower() == "j":
+                return True
+            elif eingabe.lower() == "n":
+                return False
+            else:
+                self._write_message(
+                    "Bitte geben sie j für Ja oder n für Nein ein!")
+                self._draw()
+
+    def _neu_mischen(self):
+        """
+        Mischt alle Karten auf dem Spielfeld neu durch.
+        """
+        if self._ja_nein_frage("Wollen sie die Karten wirklich neu mischen?"):
+            for a in self.anlageStapel+[self.ablageStapel]:
+                while not a.leer():
+                    k = a.ziehen()
+                    k.zudecken()
+                    self.ziehStapel.anlegen(k)
+
+            self.ziehStapel.shuffle()
+            self.anlageStapel = [AsciiStapel(karten=self._initAnlage(i+1))
+                                 for i in range(7) if self.ziehStapel.karten_anzahl() > i]
 
     def _draw_welcome(self):
         """

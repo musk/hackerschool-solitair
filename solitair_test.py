@@ -16,3 +16,11 @@ class SolitairTest(unittest.TestCase):
         s.ablageKreuz = AblageStapel(farbe=Farbe.KREUZ, karten=[Karte(
             farbe=Farbe.KREUZ, typ=t) for t in list(KartenTyp)])
         self.assertTrue(s._gewonnen())
+
+    def test_neu_mischen(self):
+        s = Solitair()
+          
+
+
+if __name__ == "__main__":
+    unittest.main()
