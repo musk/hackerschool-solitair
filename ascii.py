@@ -1,26 +1,54 @@
 from cards import Karte, Farbe, KartenTyp, Stapel
 from time import sleep
 
-
 class AsciiScreen(object):
+    """
+    Die Klasse definiert einen zeichenbaren Bildschirm im Terminal. 
+    Der Bildschirm kann dann vorbereitet werden und mittels print 
+    im Terminal ausgegeben werden. 
+    """
     def __init__(self, width=90, height=35):
+        """
+        Erstellt einen AsciiScreen mit der Breite `width` und der Höhe `height`
+        width   - int die Breite des Bildschirms
+                  Default: 90
+        height  - int die Höhe des Bildschirms
+                  Default: 35
+        """
         self.width = width
         self.height = height
         self.screen = [" " for t in range(0, width*height)]
         self.buffer = ""
 
     def _update_buffer(self) -> str:
+        """
+        Beschreibt den internen Puffer mit dem aktuellen Inhalt des Bildschirms
+        Gibt den internen Puffer als str zurück. 
+        """
         result = ""
         for y in range(self.height):
             for x in range(self.width):
                 result += self.screen[self.width*y+x]
             result += "\n"
         self.buffer = result
+        return result
 
     def clear_screen(self):
+        """
+        Löscht den Inhalt des Bildschirms in demm alle Zeichen mit ' ' ersetzt werden.
+        """
         self.screen = [" " for t in range(0, self.width*self.height)]
 
     def write_to_screen(self, text: str, x: int = 0, y: int = 0):
+        """
+        Schreibt den Text `text` an die Stelle x,y in den internen Puffer. 
+        Zum anzeigen des textes muss `self.print()` aufgerufen werden. 
+        Die Zeichen werden mittels `for ch in text` in den internen Puffer übertragen 
+        und daher werden nur einzeln kodierte Zeichen unterstützt. 
+         text - Der auszugebende Text 
+            x - int x-Koordinate wo der Text dargestellt wird
+            y - int y-Koordinate wo der Text dargestellt wird
+        """
         # TODO check that x y are within limits
         # initialize start coordinates
         _x = x
@@ -42,23 +70,57 @@ class AsciiScreen(object):
         self._update_buffer()
 
     def print(self):
+        """
+        Zeichnet den Bildschirm auf Terminal mittels print()
+        """
         print(self.buffer)
 
 
 class AsciiStapel(object):
+    """
+    Die Klasse definiert Methoden mit denen eine Stapel auf einem 
+    Terminal gezeichnet werden können.
+    """
     def __init__(self, stapel: Stapel):
+        """
+        Erstellt einen AsciiStapel der den angegebenen `stapel` darstellt.
+        stapel - Stapel der darzustellende Stapel
+        """
         self.stapel = stapel
 
     def width(self) -> int:
+        """
+        Gibt die Breite des Stapels als int zurück.
+        """
         return AsciiKarte.width()
 
-    def height(self) -> int:
-        return len(self.stapel.karten)-1 * 2 + AsciiKarte.height()
+    def height(self, fanned: bool = True) -> int:
+        """
+        Gibt die Höhe des Stapels zurück.
+        Wenn `fanned` `True` ist dann wird die Höhe in gefächerter 
+        Form dargegeben ansonsten entspricht die Höhe einer einzelnen Karte.
+        """
+        if fanned:
+            return len(self.stapel.karten)-1 * 2 + AsciiKarte.height()
+        else:
+            return AsciiKarte.height()
 
     def print(self) -> str:
+        """
+        Gibt den Stapel als str zurück in Form einer einzelne Karte. Die Methode zeichnet 
+        die oberste Karte mittels `AsciiKarte.print(karte)`.
+        """
         return AsciiKarte.print(self.stapel.top())
 
     def printFanned(self) -> str:
+        """
+        Gibt den Stapel als str in gefächerter Darstellung zurück. 
+        Der Stapel wird in die aufgedeckten und verdeckten Karten gesplitet. 
+        Für jede Karte bis auf die oberste werden die oberen 2 Zeilen der Karten Darstellung gezeichnet
+        Die oberste Karte wird komplett dargestellt. 
+        Ist die Karte verdeckt wird `AsciiKarte.back()` aufgerufen für aufgedeckte Karten wird `AsciiKarte.front()` 
+        aufgerufen.
+        """
         card_top = AsciiKarte.back().splitlines(keepends=True)[0]
         result = ""
         hidden = [k for k in self.stapel.karten if not k.aufgedeckt()]
@@ -80,16 +142,32 @@ class AsciiStapel(object):
 
 
 class AsciiKarte(object):
+    """
+    Die Klasse definiert statische Methoden für die Darstellung von einzelnen Karten 
+    auf einem Terminal.
+    """
     @classmethod
     def width(self) -> int:
+        """
+        Gibt die Breite einer Karte als int zurück
+        """
         return 10
 
     @classmethod
     def height(self) -> int:
+        """
+        Gibt die Höhe einer Karte als int zurück
+        """
         return 5
 
     @classmethod
     def print(self, karte: Karte) -> str:
+        """
+        Gibt die Karte `karte` als `str` zurück. Wenn die Karte
+        aufgedeckt ist wird `self.front(karte)` aufgerufen ansonsten 
+        wird `self.back()` aufgerufen.
+        karte - Karte die darzustellende Karte
+        """
         blatt = ""
         if karte is None:
             blatt = self.empty()
@@ -101,6 +179,10 @@ class AsciiKarte(object):
 
     @classmethod
     def front(self, karte: Karte) -> str:
+        """
+        Gibt Vorderseite der Karte `karte` als `str` zurück.
+        karte - Karte die darzustellende Karte
+        """
         typ = karte.typ.blatt
         farbe = karte.farbe.blatt
         return """┌────────┐
@@ -112,6 +194,9 @@ class AsciiKarte(object):
 
     @classmethod
     def back(self) -> str:
+        """
+        Gibt die Rückseite einer Karte als `str` zurück.
+        """
         return """┌────────┐
 │\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588│
 │\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588│
@@ -122,6 +207,9 @@ class AsciiKarte(object):
 
     @classmethod
     def empty(self) -> str:
+        """
+        Gibt die Darstellung eines leeren Stapels zurück.
+        """
         return """┌────────┐
 │        │
 │   \/   │
