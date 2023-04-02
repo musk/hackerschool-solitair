@@ -91,19 +91,13 @@ class TestStapel(unittest.TestCase):
             self.assertEqual(k, deck.ziehen())
 
     def test_ablegen_auf_stapel(self):
-        s = Stapel(ablage=True)
+        s = Stapel()
         k = Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)
         s.anlegen(k)
         self.assertEqual(1, len(s.karten))
         self.assertEqual(k, s.karten[-1])
         s.anlegen(Karte(farbe=Farbe.KARO, typ=KartenTyp.DAME))
         self.assertEqual(2, len(s.karten))
-
-    def test_ablegen_auf_nicht_ablegbaren_stapel(self):
-        s = Stapel(ablage=False)
-        k = Karte(farbe=Farbe.HERZ, typ=KartenTyp.ACHT)
-        self.assertFalse(s.anlegbar(k))
-        self.assertRaises(ValueError, lambda: s.anlegen(k))
 
     def test_top(self):
         s = Stapel()

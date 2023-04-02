@@ -165,7 +165,7 @@ class Karte(object):
 
 
 class Stapel(object):
-    def __init__(self, karten: list[Karte] = [], ablage: bool = True) -> None:
+    def __init__(self, karten: list[Karte] = []) -> None:
         """
         Erzeugt einen Kartenstapel bestehend aus den angegebenen Karten `karten`. 
         karte   - list[Karte] die Karten auf dem Stapel. 
@@ -173,7 +173,6 @@ class Stapel(object):
         ablage  - bool gibt an ob Karten auf diesen Stapel abgelegt werden können. 
                   Default: True
         """
-        self.ablage = ablage
         self.karten = karten.copy()
 
     def __str__(self) -> str:
@@ -222,7 +221,7 @@ class Stapel(object):
         Gibt `True` zurück wenn Karte `karte` an diesen Stapel angelegt werden kann 
         ansonsten `False`.
         """
-        return self.ablage
+        return True
 
     def shuffle(self):
         """
