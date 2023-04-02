@@ -49,8 +49,8 @@ class Solitair(object):
         self.navigation_anlage = False
         self.navigation_ablage = False
         self.status_msg = ""
-        self.score = 0
-        self.anlageStapel = [AsciiStapel(karten=self._initAnlage(i+1))
+        self.punkte = 0
+        self.anlageStapel = [AsciiStapel(AnlageStapel(karten=self._initAnlage(i+1)))
                              for i in range(7)]
 
     def _initAnlage(self, kartenZiehen: int) -> list[Karte]:
@@ -66,11 +66,10 @@ class Solitair(object):
             if i == kartenZiehen-1:
                 karten[i].aufdecken()
         return karten
-    
-    def _punkte_hinzufügen(self, punkte: int)->int:
-        self.score += punkte
-        return self.score
 
+    def _punkte_hinzufügen(self, punkte: int) -> int:
+        self.punkte += punkte
+        return self.punkte
 
     def _zeichnen(self) -> None:
         """
@@ -79,7 +78,9 @@ class Solitair(object):
 
         Siehe auch self.write_to_screen()
         """
-        self.screen.write_to_screen(self.score, self.screen.width - len(self.scoreTxt) - 2)
+        score_txt = f"Punkte: {self.punkte:0>4}"
+        self.screen.write_to_screen(
+            score_txt, self.screen.width - len(score_txt) - 3)
         for idx, a in enumerate([self.ablageHerz,
                                  self.ablageKaro,
                                  self.ablagePik,
@@ -91,7 +92,7 @@ class Solitair(object):
                                     self.screen.width - AsciiKarte.width()*2-2, 1)
         if self.navigation_ablage:
             self.screen.write_to_screen(
-                f"[{len(self.anlageStapel)}]", self.screen.width - AsciiKarte.width()*2-1, AsciiKarte.height()+1)
+                f"[{len(self.anlageStapel)}]", self.screen.width - AsciiKarte.width()*2-1, AsciiKarte.height()+2)
         self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
                                     self.screen.width - AsciiKarte.width()-2, 1)
 
@@ -229,7 +230,7 @@ class Solitair(object):
             "Welchen Stapel möchten sie ablegen? ", range(0, len(self.anlageStapel)+1))
         self._verstecke_navihilfe()
         if idx < len(self.anlageStapel):
-            stapel = self.anlageStapel[idx]
+            stapel = self.anlageStapel[idx].stapel
         elif idx == len(self.anlageStapel):
             stapel = self.ablageStapel
 
@@ -241,6 +242,7 @@ class Solitair(object):
                     if s.anlegbar(k):
                         s.anlegen(stapel.ziehen())
                         stapel.aufdecken()
+                        self._punkte_hinzufügen(10)
                         break
                     else:
                         msg = f"Karte {k.farbe.blatt} {k.typ.name.capitalize()} kann nicht abgelegt werden!"
@@ -260,12 +262,13 @@ class Solitair(object):
         if k:
             self._zeige_navihilfe(withAblage=False)
             idx = self._lese_nummer(f"Wo möchten sie die Karte {k.farbe.blatt} {k.typ.blatt} anlegen? ",
-                                   range(0, len(self.anlageStapel)))
+                                    range(0, len(self.anlageStapel)))
             self._verstecke_navihilfe()
-            stapel = self.anlageStapel[idx]
+            stapel = self.anlageStapel[idx].stapel
 
             if stapel.anlegbar(k):
                 stapel.anlegen(self.ablageStapel.ziehen())
+                self._punkte_hinzufügen(2)
             else:
                 self._schreibe_status(
                     f"Karte {k.farbe.blatt} {k.typ.blatt} kann nicht an Stapel [{idx}] angelegt werden!")
@@ -283,13 +286,13 @@ class Solitair(object):
         """
         self._zeige_navihilfe(withAblage=False)
         von = self._lese_nummer(f"Von welchem Stapel wollen sie Karten verschieben? ",
-                               range(0, len(self.anlageStapel)))
+                                range(0, len(self.anlageStapel)))
         vonStapel = self.anlageStapel[von].stapel
         self._schreibe_status(f"Verschieben von Stapel {von}")
         self._zeichnen()
         zu = self._lese_nummer(f"Zu welchem Stapel wollen sie die Karten verschieben? ",
-                              range(0, len(self.anlageStapel)))
-        zuStapel = self.anlageStapel[zu]
+                               range(0, len(self.anlageStapel)))
+        zuStapel = self.anlageStapel[zu].stapel
         self._verstecke_navihilfe()
         if not vonStapel.verschieben_nach(zuStapel):
             self._schreibe_status(
@@ -326,15 +329,17 @@ class Solitair(object):
         Mischt alle Karten auf dem Spielfeld neu durch.
         """
         if self._ja_nein_frage("Wollen sie die Karten wirklich neu mischen?"):
-            for a in self.anlageStapel+[self.ablageStapel]:
+            auswahl = [a.stapel for a in self.anlageStapel] + [self.ablageStapel] 
+            for a in auswahl:
                 while not a.leer():
                     k = a.ziehen()
                     k.zudecken()
                     self.ziehStapel.anlegen(k)
 
             self.ziehStapel.shuffle()
-            self.anlageStapel = [AsciiStapel(karten=self._initAnlage(i+1))
+            self.anlageStapel = [AsciiStapel(AnlageStapel(karten=self._initAnlage(i+1)))
                                  for i in range(7) if self.ziehStapel.karten_anzahl() > i]
+            self._punkte_hinzufügen(-100)
 
     def _willkommen(self):
         """

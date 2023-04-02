@@ -83,20 +83,18 @@ class AsciiScreen(object):
         print(self.buffer)
 
 
-class AsciiStapel(Stapel):
+class AsciiStapel(object):
     """
     Die Klasse definiert Methoden mit denen ein Stapel auf einem 
     Terminal gezeichnet werden können.
     """
-
-    def __init__(self, karten: list[Karte] = []):
+    def __init__(self, stapel: Stapel):
         """
         Erstellt einen AsciiStapel mit den angegebenen Karten `karten`.
 
-        karten - `list[Karte]` die Karten die auf dem Stapel liegen
-                 Default: []
+        stapel - `Stapel` der Stapel der dekoriert werden soll
         """
-        super().__init__(karten)
+        self.stapel = stapel
 
     def width(self) -> int:
         """
@@ -114,7 +112,7 @@ class AsciiStapel(Stapel):
                  `False` wenn nicht.
         """
         if fanned:
-            return len(self.karten)-1 * 2 + AsciiKarte.height()
+            return len(self.stapel.karten)-1 * 2 + AsciiKarte.height()
         else:
             return AsciiKarte.height()
 
@@ -123,7 +121,7 @@ class AsciiStapel(Stapel):
         Gibt den Stapel als str zurück in Form einer einzelne Karte. Die Methode zeichnet 
         die oberste Karte mittels `AsciiKarte.print(karte)`.
         """
-        return AsciiKarte.print(self.top())
+        return AsciiKarte.print(self.stapel.top())
 
     def printFanned(self) -> str:
         """
@@ -136,8 +134,8 @@ class AsciiStapel(Stapel):
         """
         card_top = AsciiKarte.back().splitlines(keepends=True)[0]
         result = ""
-        hidden = [k for k in self.karten if not k.aufgedeckt()]
-        shown = [k for k in self.karten if k.aufgedeckt()]
+        hidden = [k for k in self.stapel.karten if not k.aufgedeckt()]
+        shown = [k for k in self.stapel.karten if k.aufgedeckt()]
 
         if len(hidden) == 0 and len(shown) == 0:
             return AsciiKarte.empty()

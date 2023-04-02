@@ -235,7 +235,7 @@ class Stapel(object):
         karte - `Karte` die zu prüfende Karte
         """
         return True
-
+    
     def shuffle(self):
         """
         Mischt diesen Stapel.
