@@ -40,10 +40,10 @@ class Solitair(object):
                                          for type in list(KartenTyp)])
         self.ziehStapel.shuffle()
         self.ablageStapel = Stapel()
-        self.ablageHerz = AblageStapel(farbe=Farbe.HERZ)
-        self.ablageKaro = AblageStapel(farbe=Farbe.KARO)
-        self.ablageKreuz = AblageStapel(farbe=Farbe.KREUZ)
-        self.ablagePik = AblageStapel(farbe=Farbe.PIK)
+        self.ablagen = [AblageStapel(farbe=Farbe.HERZ),
+                        AblageStapel(farbe=Farbe.KARO),
+                        AblageStapel(farbe=Farbe.KREUZ),
+                        AblageStapel(farbe=Farbe.PIK)]
         self.screen = AsciiScreen(width=74, height=AsciiKarte.height()*2 + 33)
         self.navigation = False
         self.navigation_anlage = False
@@ -81,10 +81,7 @@ class Solitair(object):
         score_txt = f"Punkte: {self.punkte:>4}"
         self.screen.write_to_screen(
             score_txt, self.screen.width - len(score_txt) - 3)
-        for idx, a in enumerate([self.ablageHerz,
-                                 self.ablageKaro,
-                                 self.ablagePik,
-                                 self.ablageKreuz]):
+        for idx, a in enumerate(self.ablagen):
             self.screen.write_to_screen(AsciiKarte.print(a.top()),
                                         AsciiKarte.width()*idx+2, 1)
 
@@ -240,7 +237,7 @@ class Solitair(object):
         k = stapel.top()
         msg = ""
         if k:
-            for s in [self.ablageHerz, self.ablageKaro, self.ablagePik, self.ablageKreuz]:
+            for s in self.ablagen:
                 if k.farbe == s.farbe:
                     if s.anlegbar(k):
                         s.anlegen(stapel.ziehen())
@@ -308,7 +305,7 @@ class Solitair(object):
         Überprüft ob das Spiel gewonnen ist. 
         Wenn alle Ablagestapel komplett sind wird True zurückgegeben ansonsten False.
         """
-        return self.ablageHerz.komplett() and self.ablageKaro.komplett() and self.ablageKreuz.komplett() and self.ablagePik.komplett()
+        return all([a.komplett() for a in self.ablagen])
 
     def _ja_nein_frage(self, frage: str) -> bool:
         """
@@ -332,7 +329,8 @@ class Solitair(object):
         Mischt alle Karten auf dem Spielfeld neu durch.
         """
         if self._ja_nein_frage("Wollen sie die Karten wirklich neu mischen?"):
-            auswahl = [a.stapel for a in self.anlageStapel] + [self.ablageStapel] 
+            auswahl = [a.stapel for a in self.anlageStapel] + \
+                [self.ablageStapel]
             for a in auswahl:
                 while not a.leer():
                     k = a.ziehen()
