@@ -78,7 +78,7 @@ class Solitair(object):
 
         Siehe auch self.write_to_screen()
         """
-        score_txt = f"Punkte: {self.punkte:0>4}"
+        score_txt = f"Punkte: {self.punkte:>4}"
         self.screen.write_to_screen(
             score_txt, self.screen.width - len(score_txt) - 3)
         for idx, a in enumerate([self.ablageHerz,
@@ -186,8 +186,10 @@ class Solitair(object):
         self.screen.clear_screen()
         self.screen.write_to_screen(self.SOLITAIR + """  
                 Danke das sie Solitair gespielt haben!              
+                    Drücke Enter um fortzufahren
 """, 0, 10)
         self.screen.print()
+        input()
         exit(0)
 
     def _umdrehen(self):
@@ -202,6 +204,7 @@ class Solitair(object):
                 self.ziehStapel.anlegen(k.zudecken())
                 k = self.ablageStapel.ziehen()
             self.ziehStapel.shuffle()
+            self._punkte_hinzufügen(-20)
         else:
             self._schreibe_status(
                 "Umdrehen nicht möglich, es sind noch Karten auf dem Stapel!")
@@ -356,7 +359,7 @@ class Solitair(object):
         Zeigt den Sieger Screen für das Spiel an. 
         """
         self.screen.clear_screen()
-        self.screen.write_to_screen("""
+        self.screen.write_to_screen(f"""
         ███████╗ ██████╗ ██╗     ██╗████████╗ █████╗ ██╗██████╗ 
         ██╔════╝██╔═══██╗██║     ██║╚══██╔══╝██╔══██╗██║██╔══██╗
         ███████╗██║   ██║██║     ██║   ██║   ███████║██║██████╔╝
@@ -372,6 +375,7 @@ class Solitair(object):
  ╚═════╝ ╚══════╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═══╝
 
                       (c) 2023 Stefan Langer
+                      Sie haben {self.punkte:>4} Punkte
 """, 0, 10)
         self.screen.print()
 
