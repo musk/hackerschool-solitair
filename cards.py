@@ -85,7 +85,7 @@ class Karte(object):
         """
         textuelle Darstellung der Karte 
         """
-        return f"{self.farbe.blatt} {self.typ.blatt}"
+        return f"{'' if self.visible else '-'}{self.farbe.blatt}{self.typ.blatt}"
 
     def __eq__(self, other: object) -> bool:
         """
@@ -93,7 +93,7 @@ class Karte(object):
         die Karte `other` ansonsten `False.` 
         Zwei Karten gelten als gleich wenn sie beide vom Type Karte sind 
         und die gleiche Farbe wie auch den gleichen Wert haben.
-        
+
         other - `object` das Objekt mit dem verglichen wird 
         """
         if type(other) == Karte:
@@ -104,7 +104,7 @@ class Karte(object):
         """
         Gibt `True` zurück wenn der Farbwert und Wert dieser Karte Kleiner ist als 
         die der Karte `other` ansonsten `False.`
-        
+
         other - `object` das Objekt mit dem verglichen wird
         """
         if self.farbe == other.farbe:
@@ -179,17 +179,30 @@ class Stapel(object):
     def __init__(self, karten: list[Karte] = []):
         """
         Erzeugt einen Kartenstapel bestehend aus den angegebenen Karten `karten`. 
-        
+
         karten - `list[Karte]` die Karten auf dem Stapel. 
                  Default: []
         """
         self.karten = karten.copy()
-
+    def _karten_str(self) -> str:
+        return f"[{','.join([str(k) for k in self.karten])}]"
+    
     def __str__(self) -> str:
         """
         textuelle Darstellung dieses Stapels
         """
-        return ", ".join([str(k) for k in self.karten])
+        return f"Stapel({self._karten_str()})"
+
+    def __repr__(self) -> str:
+        return f"Stapel({repr(self.karten)})"
+
+    def __eq__(self, other: object) -> bool:
+        if type(other) == Stapel:
+            return other.karten == self.karten
+        return False
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
 
     def top(self) -> Karte:
         """
@@ -219,7 +232,7 @@ class Stapel(object):
         """
         Legt Karte `karte` an diesen Stapel an wenn `self.anlegbar(karte)` `True` zurück gibt
         ansonsten wird ein `ValueError` geschmissen. 
-        
+
         karte - `Karte` die Karte die angelegt wird 
         """
         if not self.anlegbar(karte):
@@ -231,11 +244,11 @@ class Stapel(object):
         """
         Gibt `True` zurück wenn Karte `karte` an diesen Stapel angelegt werden kann 
         ansonsten `False`.
-        
+
         karte - `Karte` die zu prüfende Karte
         """
         return True
-    
+
     def shuffle(self):
         """
         Mischt diesen Stapel.
@@ -249,7 +262,7 @@ class Stapel(object):
         Gibt `True` zurück wenn der Stapel leer ist ansonsten `False`
         """
         return len(self.karten) == 0
-    
+
     def karten_anzahl(self) -> int:
         """
         Gibt die Anzahl der Karten auf dem Stapel als `int` zurück.
@@ -263,10 +276,15 @@ class AblageStapel(Stapel):
         self.farbe = farbe
 
     def __repr__(self) -> str:
-        return f"AblageStapel({repr(self.farbe)}, {repr(self.karten)})"
+        return f"AblageStapel({repr(self.farbe)},{repr(self.karten)})"
 
     def __str__(self) -> str:
-        return f"AblageStapel({self.farbe.name}, {self.karten[-1] if len(self.karten) > 0 else []})"
+        return f"AblageStapel({self.farbe.blatt},{self._karten_str()})"
+
+    def __eq__(self, other: object) -> bool:
+        if type(other) == AblageStapel:
+            return self.farbe == other.farbe and self.karten == other.karten
+        return False
 
     def anlegbar(self, karte) -> bool:
         """
@@ -300,6 +318,17 @@ class AblageStapel(Stapel):
 class AnlageStapel(Stapel):
     def __init__(self, karten: list[Karte] = []):
         super().__init__(karten)
+
+    def __eq__(self, other: object) -> bool:
+        if type(other) == AnlageStapel:
+            return self.karten == other.karten
+        return False
+
+    def __str__(self) -> str:
+        return f"AnlageStapel({self._karten_str()})"
+
+    def __repr__(self) -> str:
+        return f"AnlageStapel({repr(self.karten)})"
 
     def anlegbar(self, karte) -> bool:
         """

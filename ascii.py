@@ -95,6 +95,12 @@ class AsciiStapel(object):
         stapel - `Stapel` der Stapel der dekoriert werden soll
         """
         self.stapel = stapel
+        
+    def __repr__(self) -> str:
+        return f"AsciiStapel({repr(self.stapel)})"
+    
+    def __str__(self) -> str:
+        return f"AsciiStapel({self.stapel})"
 
     def width(self) -> int:
         """

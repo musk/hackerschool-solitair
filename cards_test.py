@@ -74,6 +74,35 @@ class TestAblageStapel(unittest.TestCase):
         s.anlegen(k)
         self.assertTrue(s.komplett())
 
+    def test_eq_empty(self):
+        s1 = AblageStapel(farbe=Farbe.HERZ)
+        s2 = AblageStapel(farbe=Farbe.HERZ)
+        self.assertEqual(s1, s2)
+        self.assertEqual(s2, s1)
+
+    def test_eq_nonempty(self):
+        karten = [Karte(farbe=Farbe.HERZ, typ=t) for t in list(KartenTyp)]
+        s1 = AblageStapel(Farbe.PIK, karten)
+        s2 = AblageStapel(Farbe.PIK, karten)
+        self.assertEqual(s1, s2)
+        self.assertEqual(s2, s1)
+
+    def test_ne(self):
+        karten = [Karte(farbe=Farbe.KREUZ, typ=t) for t in list(KartenTyp)]
+        s1 = AblageStapel(farbe=Farbe.KREUZ, karten=karten)
+        s2 = AblageStapel(farbe=Farbe.KREUZ, karten=karten)
+        s4 = AblageStapel(farbe=Farbe.HERZ, karten=karten)
+        s3 = AblageStapel(farbe=Farbe.KREUZ)
+        s4 = AblageStapel(farbe=Farbe.HERZ, karten=karten)
+        self.assertEqual(s1, s2)
+        s2.ziehen()
+        self.assertNotEqual(s1, s3)
+        self.assertNotEqual(s3, s1)
+        self.assertNotEqual(s1, s2)
+        self.assertNotEqual(s2, s1)
+        self.assertNotEqual(s4, s1)
+        self.assertNotEqual(s1, s4)
+
 
 class TestStapel(unittest.TestCase):
     def test_ziehen_von_leerem_stapel(self):
@@ -118,6 +147,33 @@ class TestStapel(unittest.TestCase):
         self.assertFalse(s.top().aufgedeckt())
         s.aufdecken()
         self.assertTrue(s.top().aufgedeckt())
+
+    def test_eq_empty(self):
+        s1 = Stapel()
+        s2 = Stapel()
+        self.assertEqual(s1, s2)
+        self.assertEqual(s2, s1)
+
+    def test_eq_nonempty(self):
+        karten = [Karte(farbe=f, typ=t) for f in list(Farbe)
+                  for t in list(KartenTyp)]
+        s1 = Stapel(karten)
+        s2 = Stapel(karten)
+        self.assertEqual(s1, s2)
+        self.assertEqual(s2, s1)
+
+    def test_ne(self):
+        karten = [Karte(farbe=f, typ=t) for f in list(Farbe)
+                  for t in list(KartenTyp)]
+        s1 = Stapel(karten)
+        s2 = Stapel(karten)
+        s3 = Stapel()
+        self.assertEqual(s1, s2)
+        s2.ziehen()
+        self.assertNotEqual(s1, s3)
+        self.assertNotEqual(s3, s1)
+        self.assertNotEqual(s1, s2)
+        self.assertNotEqual(s2, s1)
 
 
 class TestAnlageStapel(unittest.TestCase):
@@ -244,6 +300,33 @@ class TestAnlageStapel(unittest.TestCase):
         self.assertEqual(behalten, von.karten)
         self.assertEqual(exist+verschoben, zu.karten)
         self.assertTrue(von.leer())
+
+    def test_eq_empty(self):
+        s1 = AnlageStapel()
+        s2 = AnlageStapel()
+        self.assertEqual(s1, s2)
+        self.assertEqual(s2, s1)
+
+    def test_eq_nonempty(self):
+        karten = [Karte(farbe=f, typ=t) for f in list(Farbe)
+                  for t in list(KartenTyp)]
+        s1 = AnlageStapel(karten)
+        s2 = AnlageStapel(karten)
+        self.assertEqual(s1, s2)
+        self.assertEqual(s2, s1)
+
+    def test_ne(self):
+        karten = [Karte(farbe=f, typ=t) for f in list(Farbe)
+                  for t in list(KartenTyp)]
+        s1 = AnlageStapel(karten)
+        s2 = AnlageStapel(karten)
+        s3 = AnlageStapel()
+        self.assertEqual(s1, s2)
+        s2.ziehen()
+        self.assertNotEqual(s1, s3)
+        self.assertNotEqual(s3, s1)
+        self.assertNotEqual(s1, s2)
+        self.assertNotEqual(s2, s1)
 
     def _assertOrder(self, stapel: AnlageStapel) -> None:
         prev_farbe = None
