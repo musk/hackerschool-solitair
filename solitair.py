@@ -119,26 +119,30 @@ class Solitair(object):
 
     def _undo_speicher_str(self) -> str:
         return f"[{','.join([str(s.id) for s in self.speicher])}]"
-    
+
     def _spielstand_erzeugen(self) -> Spielstand:
         return Spielstand(self.anlageStapel, self.ziehStapel,
-                             self.ablageStapel, self.ablagen, self.punkte)
-        
+                          self.ablageStapel, self.ablagen, self.punkte)
+
     def _spielstand_sichern(self, spielstand: Spielstand):
-        LOG.debug("Spielstand %s sichern!", spielstand.id)
-        LOG.debug("%s", spielstand)
-        self.speicher.append(spielstand)
-        LOG.debug("Undo Speicher %s", self._undo_speicher_str())
+        letzter = self._letzter_gesicherter_spielstand()
+        if spielstand == letzter:
+            LOG.info("Letzer Spielstand %s == Spielstand %s! Spielstand %s nicht gesichert!", letzter.id, spielstand.id, spielstand.id)
+        else:
+            LOG.info("Spielstand %s gesichert!", spielstand.id)
+            LOG.debug("%s", spielstand)
+            self.speicher.append(spielstand)
+            LOG.debug("Undo Speicher %s", self._undo_speicher_str())
 
     def _spielstand_herstellen(self, spielstand: Spielstand):
         LOG.info("Herstellen von Spielstand %s!", spielstand.id)
-        LOG.debug("Herzustellender Spielstand %s", spielstand)
+        LOG.debug("Spielstand: %s", spielstand)
         self.ablagen = spielstand.ablagen
         self.ablageStapel = spielstand.ablageStapel
         self.anlageStapel = spielstand.anlageStapel
         self.ziehStapel = spielstand.ziehStapel
         self.punkte = spielstand.punkte
-        
+
     def _spielzug_zurueck_nehmen(self) -> Spielstand:
         if len(self.speicher) > 0:
             sp = self.speicher.pop()
@@ -209,8 +213,11 @@ class Solitair(object):
         """
         eingabe: str = input("Option: ").lower().strip()
         if eingabe in Solitair.COMMANDS:
-            
-            exec(Solitair.COMMANDS[eingabe]["method"])    
+            sp = self._spielstand_erzeugen()
+            LOG.info("Spielstand %s erzeugt!", sp.id)
+            exec(Solitair.COMMANDS[eingabe]["method"])
+            if eingabe.lower() != "u":
+                self._spielstand_sichern(sp)
         else:
             self._schreibe_status(
                 f"Ungültige eingabe: {eingabe}! Bitte wählen sie eine gültige Option.")
@@ -286,14 +293,16 @@ class Solitair(object):
                 k = self.ablageStapel.ziehen()
             self.ziehStapel.shuffle()
             self._punkte_hinzufügen(-20)
+            log.info("Ziehstapel neu gemischt!")
         else:
             self._schreibe_status(
                 "Umdrehen nicht möglich, es sind noch Karten auf dem Stapel!")
 
     def _undo(self):
         if self._ja_nein_frage("Wollen sie den Zug wirklich zurücknehmen?"):
-            if self._spielzug_zurueck_nehmen():
-                self._spielstand_herstellen()
+            sp = self._spielzug_zurueck_nehmen()
+            if sp:
+                self._spielstand_herstellen(sp)
             else:
                 self._schreibe_status("Sie können nicht weiter zurück gehen!")
 
@@ -307,7 +316,6 @@ class Solitair(object):
         if k:
             LOG.debug("Karte %s gezogen und abgelegt", k)
             self.ablageStapel.anlegen(k.aufdecken())
-            self._spielstand_sichern()
 
     def _ablegen(self):
         """
@@ -337,6 +345,7 @@ class Solitair(object):
                         s.anlegen(stapel.ziehen())
                         stapel.aufdecken()
                         self._punkte_hinzufügen(10)
+                        LOG.info(f"Karte {str(k)} abgelegt!")
                         break
                     else:
                         msg = f"Karte {str(k)} kann nicht abgelegt werden!"
@@ -363,6 +372,7 @@ class Solitair(object):
             if stapel.anlegbar(k):
                 stapel.anlegen(self.ablageStapel.ziehen())
                 self._punkte_hinzufügen(2)
+                LOG.info(f"Karte {str(k)} an Stapel {str(stapel)} angelegt!")
             else:
                 self._schreibe_status(
                     f"Karte {k.farbe.blatt} {k.typ.blatt} kann nicht an Stapel [{idx}] angelegt werden!")
@@ -390,10 +400,11 @@ class Solitair(object):
         self._verstecke_navihilfe()
         if vonStapel.verschieben_nach(zuStapel):
             self._schreibe_status("")
+            LOG.info(f"Karten von Stapel {str(vonStapel)} zu {str(zuStapel)} verschoben!")
         else:
             self._schreibe_status(
                 f"Verschieben von Stapel {von} auf Stapel {zu} nicht möglich!")
-        
+
     def _gewonnen(self):
         """
         Überprüft ob das Spiel gewonnen ist.
@@ -423,7 +434,8 @@ class Solitair(object):
         Mischt alle Karten auf dem Spielfeld neu durch.
         """
         if self._ja_nein_frage("Wollen sie die Karten wirklich neu mischen?"):
-            auswahl = [a.stapel for a in self.anlageStapel] + [self.ablageStapel]
+            auswahl = [a.stapel for a in self.anlageStapel] + \
+                [self.ablageStapel]
             for a in auswahl:
                 while not a.leer():
                     k = a.ziehen()
@@ -434,6 +446,7 @@ class Solitair(object):
             self.anlageStapel = [AsciiStapel(AnlageStapel(karten=self._initAnlage(i+1)))
                                  for i in range(7) if self.ziehStapel.karten_anzahl() > i]
             self._punkte_hinzufügen(-100)
+            LOG.info(f"Spielfeld neu ausgelegt!")
 
     def _willkommen(self):
         """
