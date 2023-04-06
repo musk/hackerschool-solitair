@@ -293,7 +293,7 @@ class Solitair(object):
                 k = self.ablageStapel.ziehen()
             self.ziehStapel.shuffle()
             self._punkte_hinzufügen(-20)
-            log.info("Ziehstapel neu gemischt!")
+            LOG.info("Ziehstapel neu gemischt!")
         else:
             self._schreibe_status(
                 "Umdrehen nicht möglich, es sind noch Karten auf dem Stapel!")
