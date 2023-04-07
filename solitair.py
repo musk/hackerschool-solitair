@@ -1,3 +1,4 @@
+from time import sleep
 from cards import Karte, Stapel, AnlageStapel, AblageStapel, Farbe, KartenTyp
 from ascii import AsciiScreen, AsciiKarte, AsciiStapel
 from collections import deque
@@ -468,13 +469,6 @@ class Solitair(object):
             self._schreibe_status(
                 f"Verschieben von Stapel {von} auf Stapel {zu} nicht möglich!")
 
-    def _gewonnen(self):
-        """
-        Überprüft ob das Spiel gewonnen ist.
-        Wenn alle Ablagestapel komplett sind wird True zurückgegeben ansonsten False.
-        """
-        return all([a.komplett() for a in self.ablagen])
-
     def _neu_mischen(self):
         """
         Mischt alle Karten auf dem Spielfeld neu durch.
@@ -529,8 +523,63 @@ class Solitair(object):
 """, 0, 10)
         self.screen.print()
 
-    def _init_logging(self):
-        pass
+    def _gewonnen(self):
+        """
+        Überprüft ob das Spiel gewonnen ist.
+        Wenn alle Ablagestapel komplett sind wird `True` zurückgegeben ansonsten `False`.
+        """
+        return all([a.komplett() for a in self.ablagen])
+
+    def _auto_karte_zeichnen(self, karte: Karte, start_idx: int, stop_idx: int, anzahl_karten: int):
+        x = AsciiKarte.width()*start_idx+2
+        y = AsciiKarte.height()+2*2*anzahl_karten
+        end_x = AsciiKarte.width()*stop_idx+2
+        end_y = 1
+
+        steps = 3
+        x_step = max(1, int(abs(x-end_x) / steps))
+        delta_y = -(max(1, int(abs(y-end_y) / steps)))
+
+        if x < end_x:
+            delta_x = x_step
+        elif x > end_x:
+            delta_x = -x_step
+        else:
+            delta_x = 0
+
+        for i in range(0, steps-1):
+            x += delta_x
+            y += delta_y
+
+            self.screen.clear_screen()
+            self._zeichnen()
+            self.screen.write_to_screen(AsciiKarte.print(karte), x, y)
+            self.screen.print()
+            sleep(0.2)
+
+    def _auto_anlegen(self):
+        for start_idx, s in enumerate(self.anlageStapel):
+            k = s.stapel.top()
+            if k:
+                for stop_idx, a in enumerate(self.ablagen):
+                    if a.anlegbar(k):
+                        kt = s.stapel.ziehen()
+                        self._auto_karte_zeichnen(kt, start_idx, stop_idx, s.stapel.karten_anzahl())
+                        a.anlegen(kt)
+                        self._punkte_hinzufügen(10)
+                        self.screen.clear_screen()
+                        self._zeichnen()
+                        sleep(0.2)
+                        return
+
+    def _beenden(self):
+        sichtbareKarten = [
+            k.visible for s in self.anlageStapel for k in s.stapel.karten]
+        if (all(sichtbareKarten) and s.ziehStapel.leer() and s.ablageStapel.leer()):
+            if self._ja_nein_frage("Sie haben das Spiel gewonnen, wollen sie das Spiel automatisch beenden?"):
+                while not self._gewonnen():
+                    self._auto_anlegen()
+                    sleep(0.5)
 
     def starten(self):
         """
@@ -557,6 +606,8 @@ class Solitair(object):
             self._eingabe()
             self.screen.clear_screen()
             self._zeichnen()
+            self._beenden()
+
         self._gewonnen_zeichnen()
         input()
 
