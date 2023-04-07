@@ -1,51 +1,12 @@
 from cards import Karte, Stapel, AnlageStapel, AblageStapel, Farbe, KartenTyp
 from ascii import AsciiScreen, AsciiKarte, AsciiStapel
-from copy import deepcopy
 from collections import deque
 import logging
 from logging.config import dictConfig
 from json import load as jload
-import sys
+from spielstand import Spielstand
 
 LOG = logging.getLogger("solitair")
-
-
-class Spielstand(object):
-    """
-    Speichert den aktuellen Spielstand eines Solitairspiels
-    """
-    ID_GEN = 0
-
-    @classmethod
-    def _gen_id(self) -> int:
-        Spielstand.ID_GEN += 1
-        return Spielstand.ID_GEN
-
-    def __init__(self, anlageStapel: list[AnlageStapel], ziehStapel: Stapel, ablageStapel: Stapel, ablagen: list[AblageStapel], punkte: int) -> None:
-        self.ablagen = deepcopy(ablagen)
-        self.anlageStapel = deepcopy(anlageStapel)
-        self.ablageStapel = deepcopy(ablageStapel)
-        self.ziehStapel = deepcopy(ziehStapel)
-        self.punkte = punkte
-        self.id = Spielstand._gen_id()
-
-    def __eq__(self, other: object) -> bool:
-        if type(other) == Spielstand:
-            return (self.ablagen == other.ablagen and
-                    self.anlageStapel == other.anlageStapel and
-                    self.ablageStapel == other.ablageStapel and
-                    self.ziehStapel == other.ziehStapel and
-                    self.punkte == other.punkte)
-        return False
-
-    def __ne__(self, other: object) -> bool:
-        return not self.__eq__(other)
-
-    def __str__(self) -> str:
-        return f"Sp:{self.id}({','.join([str(a) for a in self.ablagen])},{','.join([str(a) for a in self.anlageStapel])},{str(self.ablageStapel)},{str(self.ziehStapel)},{str(self.punkte)})"
-
-    def __repr__(self) -> str:
-        return f"Spielstand({repr(self.ablagen)},{repr(self.anlageStapel)},{repr(self.ablageStapel)},{repr(self.ziehStapel)},{repr(self.punkte)})"
 
 
 class Solitair(object):
@@ -522,3 +483,4 @@ if __name__ == "__main__":
 
     s = Solitair()
     s.starten()
+
