@@ -37,7 +37,7 @@ class Solitair(object):
                 "m": {"text": "neu [m]ischen", "method": "self._neu_mischen()"},
                 "s": {"text": "[s]peichern", "method": "self._speichern()"},
                 "l": {"text": "[l]aden", "method": "self._laden()"},
-                "b": {"text": "[b]eenden", "method": "self._ende()"}, }
+                "e": {"text": "be[e]nden", "method": "self._ende()"}, }
 
     DATEI_LISTE_WIDTH = 45
     DATEI_LISTE_HEIGHT = 23
@@ -277,6 +277,23 @@ class Solitair(object):
         self.navigation_anlage = False
         self.navigation_ablage = False
 
+    def _ja_nein_frage(self, frage: str) -> bool:
+        """
+        Stellt die Ja-Nein-Frage `frage` und gibt `True` zurück wenn der User mit Ja antwortet ansonsten `False`.
+
+        frage - `str` Die Ja-Nein-Frage die gestellt werden soll.
+        """
+        while True:
+            eingabe = input(f"{frage} (j/n)")
+            if eingabe.lower() == "j":
+                return True
+            elif eingabe.lower() == "n":
+                return False
+            else:
+                self._schreibe_status(
+                    "Bitte geben sie j für Ja oder n für Nein ein!")
+                self._zeichnen()
+
     def _ende(self):
         """
         Method wird aufgerufen wenn der beenden Menüpunkt gewählt wird.
@@ -457,23 +474,6 @@ class Solitair(object):
         Wenn alle Ablagestapel komplett sind wird True zurückgegeben ansonsten False.
         """
         return all([a.komplett() for a in self.ablagen])
-
-    def _ja_nein_frage(self, frage: str) -> bool:
-        """
-        Stellt die Ja-Nein-Frage `frage` und gibt `True` zurück wenn der User mit Ja antwortet ansonsten `False`.
-
-        frage - `str` Die Ja-Nein-Frage die gestellt werden soll.
-        """
-        while True:
-            eingabe = input(f"{frage} (j/n)")
-            if eingabe.lower() == "j":
-                return True
-            elif eingabe.lower() == "n":
-                return False
-            else:
-                self._schreibe_status(
-                    "Bitte geben sie j für Ja oder n für Nein ein!")
-                self._zeichnen()
 
     def _neu_mischen(self):
         """
