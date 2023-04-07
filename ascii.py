@@ -164,21 +164,21 @@ class AsciiKarte(object):
     auf einem Terminal.
     """
     @classmethod
-    def width(self) -> int:
+    def width(cls) -> int:
         """
         Gibt die Breite einer Karte als int zurück
         """
         return 10
 
     @classmethod
-    def height(self) -> int:
+    def height(cls) -> int:
         """
         Gibt die Höhe einer Karte als int zurück
         """
         return 5
 
     @classmethod
-    def print(self, karte: Karte) -> str:
+    def print(cls, karte: Karte) -> str:
         """
         Gibt die Karte `karte` als `str` zurück. Wenn die Karte
         aufgedeckt ist wird `self.front(karte)` aufgerufen ansonsten 
@@ -188,15 +188,15 @@ class AsciiKarte(object):
         """
         blatt = ""
         if karte is None:
-            blatt = self.empty()
+            blatt = cls.empty()
         elif karte.aufgedeckt():
-            blatt = self.front(karte)
+            blatt = cls.front(karte)
         else:
-            blatt = self.back()
+            blatt = cls.back()
         return blatt
 
     @classmethod
-    def front(self, karte: Karte) -> str:
+    def front(cls, karte: Karte) -> str:
         """
         Gibt Vorderseite der Karte `karte` als `str` zurück.
         
@@ -212,7 +212,7 @@ class AsciiKarte(object):
 └────────┘""".format(typ, farbe)
 
     @classmethod
-    def back(self) -> str:
+    def back(cls) -> str:
         """
         Gibt die Rückseite einer Karte als `str` zurück.
         """
@@ -225,7 +225,7 @@ class AsciiKarte(object):
 """
 
     @classmethod
-    def empty(self) -> str:
+    def empty(cls) -> str:
         """
         Gibt die Darstellung eines leeren Stapels zurück.
         """

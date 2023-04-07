@@ -152,14 +152,10 @@ class Spielstand(object):
             dump(Spielstand.SD.serialize(self), f,
                  sort_keys=True, ensure_ascii=True)
 
-    def laden(self, dateiName: str) -> None:
+    @classmethod
+    def laden(cls, dateiName: str) -> None:
         with open(file=dateiName, mode="r", encoding="utf-8") as f:
-            sp: Spielstand = Spielstand.SD.deserialize(load(f))
-            self.ablagen = sp.ablagen
-            self.anlageStapel = sp.anlageStapel
-            self.ablageStapel = sp.ablageStapel
-            self.ziehStapel = sp.ziehStapel
-            self.punkte = sp.punkte
+            return Spielstand.SD.deserialize(load(f))
 
 
 if __name__ == "__main__":
@@ -248,4 +244,4 @@ if __name__ == "__main__":
 
     dateiName = "spielstand.save.json"
     spielstand.speichern(dateiName)
-    spielstand.laden(dateiName)
+    Spielstand.laden(dateiName)

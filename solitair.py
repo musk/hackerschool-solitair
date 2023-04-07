@@ -2,9 +2,12 @@ from cards import Karte, Stapel, AnlageStapel, AblageStapel, Farbe, KartenTyp
 from ascii import AsciiScreen, AsciiKarte, AsciiStapel
 from collections import deque
 import logging
+import re
 from logging.config import dictConfig
 from json import load as jload
 from spielstand import Spielstand
+from datetime import datetime
+from pathlib import Path
 
 LOG = logging.getLogger("solitair")
 
@@ -25,14 +28,19 @@ class Solitair(object):
         ╚══════╝ ╚═════╝ ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
                         (c) 2023 Stefan Langer"""
 
-    COMMANDS = {"z": {"text": "[z]iehen", "method": f"self._ziehen()"},
-                "a": {"text": "[a]nlegen", "method": f"self._anlegen()"},
-                "l": {"text": "ab[l]egen", "method": f"self._ablegen()"},
-                "m": {"text": "neu [m]ischen", "method": f"self._neu_mischen()"},
-                "v": {"text": "[v]erschieben", "method": f"self._verschieben()"},
-                "u": {"text": "[u]ndo", "method": f"self._undo()"},
-                "g": {"text": "neu [g]eben", "method": f"self._umdrehen()"},
-                "b": {"text": "[b]eenden", "method": f"self._ende()"}, }
+    COMMANDS = {"z": {"text": "[z]iehen", "method": "self._ziehen()"},
+                "a": {"text": "[a]nlegen", "method": "self._anlegen()"},
+                "b": {"text": "a[b]legen", "method": "self._ablegen()"},
+                "v": {"text": "[v]erschieben", "method": "self._verschieben()"},
+                "u": {"text": "[u]ndo", "method": "self._undo()"},
+                "g": {"text": "neu [g]eben", "method": "self._umdrehen()"},
+                "m": {"text": "neu [m]ischen", "method": "self._neu_mischen()"},
+                "s": {"text": "[s]peichern", "method": "self._speichern()"},
+                "l": {"text": "[l]aden", "method": "self._laden()"},
+                "b": {"text": "[b]eenden", "method": "self._ende()"}, }
+
+    DATEI_LISTE_WIDTH = 45
+    DATEI_LISTE_HEIGHT = 23
 
     MAX_UNDOS = 10
 
@@ -59,6 +67,7 @@ class Solitair(object):
         self.navigation_anlage = False
         self.navigation_ablage = False
         self.status_msg = ""
+        self.datei_liste = ""
         self.punkte = 0
         self.anlageStapel = [AsciiStapel(AnlageStapel(karten=self._initAnlage(i+1)))
                              for i in range(7)]
@@ -82,13 +91,14 @@ class Solitair(object):
         return f"[{','.join([str(s.id) for s in self.speicher])}]"
 
     def _spielstand_erzeugen(self) -> Spielstand:
-        return Spielstand(self.anlageStapel, self.ziehStapel,
+        return Spielstand([s.stapel for s in self.anlageStapel], self.ziehStapel,
                           self.ablageStapel, self.ablagen, self.punkte)
 
     def _spielstand_sichern(self, spielstand: Spielstand):
         letzter = self._letzter_gesicherter_spielstand()
         if spielstand == letzter:
-            LOG.info("Letzer Spielstand %s == Spielstand %s! Spielstand %s nicht gesichert!", letzter.id, spielstand.id, spielstand.id)
+            LOG.info("Letzer Spielstand %s == Spielstand %s! Spielstand %s nicht gesichert!",
+                     letzter.id, spielstand.id, spielstand.id)
         else:
             LOG.info("Spielstand %s gesichert!", spielstand.id)
             LOG.debug("%s", spielstand)
@@ -100,7 +110,7 @@ class Solitair(object):
         LOG.debug("Spielstand: %s", spielstand)
         self.ablagen = spielstand.ablagen
         self.ablageStapel = spielstand.ablageStapel
-        self.anlageStapel = spielstand.anlageStapel
+        self.anlageStapel = [AsciiStapel(s) for s in spielstand.anlageStapel]
         self.ziehStapel = spielstand.ziehStapel
         self.punkte = spielstand.punkte
 
@@ -152,7 +162,47 @@ class Solitair(object):
             self._menue(), 0, AsciiKarte.height()*2 + 30)
         self.screen.write_to_screen(
             self.status_msg, 2, AsciiKarte.height()*2 + 28)
+
+        if self.datei_liste:
+            self.screen.write_to_screen(self.datei_liste, int(
+                self.screen.width/2-Solitair.DATEI_LISTE_WIDTH/2), int(self.screen.height/2-Solitair.DATEI_LISTE_HEIGHT/2)-4)
+
         self.screen.print()
+
+    def _zeichne_dateiauswahl(self, speicherDir: Path, laden: bool = False) -> Path:
+        sicherungsDateien = [f for f in speicherDir.glob(
+            "*.save.json") if f.is_file()]
+        dateien = []
+        for i in range(0, 10):
+            if i < len(sicherungsDateien):
+                dateien.append(sicherungsDateien[i])
+            else:
+                dateien.append("")
+
+        dateiListe = "┌───────────────────────────────────────────┐\n"
+        for idx, path in enumerate(start=1, iterable=dateien):
+            match = re.match(
+                r"^solitair-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2}).save.json$", path.name if path != "" else "")
+            if match:
+                (jahr, monat, tag, stunde, minute, sekunde) = match.groups()
+                dateiListe += f"│ {idx:>2}: {jahr}.{monat}.{tag} {stunde}:{minute}:{sekunde}\n│     {path.name}    │\n"
+            elif laden:
+                dateiListe += f"│                                           │\n│                                           │\n"
+            else:
+                dateiListe += f"│ {idx:>2}: <leer>                                │\n│                                           │\n"
+        dateiListe += "│  0: abbrechen                             │\n"
+        dateiListe += "└───────────────────────────────────────────┘"
+
+        self.datei_liste = dateiListe
+        self._zeichnen()
+        validation = range(0, len(sicherungsDateien)+1
+                           ) if laden else range(0, 11)
+        wahl = self._lese_nummer(
+            "Welcher Speicherstand soll verwendet werden?", validation)
+        self.datei_liste = None
+        if wahl == 0:
+            return None
+        return dateien[wahl-1]
 
     def _menue(self) -> str:
         """
@@ -162,7 +212,7 @@ class Solitair(object):
         idx = 1
         for cmd in [v["text"] for k, v in Solitair.COMMANDS.items()]:
             menu += f"{cmd:<15}"
-            if idx % 4 == 0:
+            if idx % 5 == 0:
                 menu += "\n"
             idx += 1
         return menu
@@ -267,6 +317,40 @@ class Solitair(object):
             else:
                 self._schreibe_status("Sie können nicht weiter zurück gehen!")
 
+    def _speichern(self):
+        speicherDir = Path("~/.solitair").expanduser()
+        auswahl = self._zeichne_dateiauswahl(speicherDir)
+        if auswahl is None:
+            self._schreibe_status("Speichervorgang abgebrochen!")
+        else:
+            if auswahl != "":
+                if self._ja_nein_frage(f"Soll die Datei '{auswahl}' ersetzt werden?"):
+                    auswahl.unlink()
+                else:
+                    self._schreibe_status("Speichervorgang abgebrochen!")
+                    return
+
+            dateStr = datetime.now().strftime("%Y%m%d-%H%M%S")
+            dateiPath = Path(speicherDir,
+                             f"solitair-{dateStr}.save.json").absolute()
+            dateiname = str(dateiPath)
+            if not dateiPath.parent.exists():
+                dateiPath.parent.mkdir(parents=True)
+            self._spielstand_erzeugen().speichern(dateiname)
+            LOG.info(f"Spiel gespeichert in '{dateiname}'!")
+            if auswahl != "":
+                LOG.info(f"Datei '{auswahl}' überschieben!")
+
+    def _laden(self):
+        auswahl = self._zeichne_dateiauswahl(
+            Path("~/.solitair").expanduser(), laden=True)
+        if auswahl:
+            self._spielstand_herstellen(
+                Spielstand.laden(str(auswahl.absolute())))
+            LOG.info(f"Spiel '{auswahl.name}' geladen!")
+        else:
+            self._schreibe_status("Ladevorgang abgebrochen!")
+
     def _ziehen(self):
         """
         Die Methode wird aufgerufen wenn der ziehen Menüpunkt ausgewählt wird.
@@ -361,7 +445,8 @@ class Solitair(object):
         self._verstecke_navihilfe()
         if vonStapel.verschieben_nach(zuStapel):
             self._schreibe_status("")
-            LOG.info(f"Karten von Stapel {str(vonStapel)} zu {str(zuStapel)} verschoben!")
+            LOG.info(
+                f"Karten von Stapel {str(vonStapel)} zu {str(zuStapel)} verschoben!")
         else:
             self._schreibe_status(
                 f"Verschieben von Stapel {von} auf Stapel {zu} nicht möglich!")
@@ -480,7 +565,9 @@ if __name__ == "__main__":
     with open(file="logging.json", mode="r", encoding="utf-8") as logconfig:
         configDict = jload(logconfig)
         dictConfig(configDict)
-
-    s = Solitair()
-    s.starten()
-
+    try:
+        s = Solitair()
+        s.starten()
+    except Exception as ex:
+        LOG.error(f"Exception {ex}")
+        raise ex
