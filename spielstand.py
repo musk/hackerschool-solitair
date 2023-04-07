@@ -103,7 +103,7 @@ class SpielstandDeSerializer(object):
             if k in SpielstandDeSerializer.farb_lookup:
                 farbe = SpielstandDeSerializer.farb_lookup[k]
                 res.append(AblageStapel(farbe, [
-                    Karte(farbe, self._kartentyp_lesen(s)) for s in v.split(",") if len(v) > 0]))
+                    Karte(farbe, self._kartentyp_lesen(s), visible=True) for s in v.split(",") if len(v) > 0]))
             else:
                 raise ValueError(f"Illegale ablage definition {k}!")
         return res
