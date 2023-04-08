@@ -148,7 +148,7 @@ class Solitair(object):
                                     self.screen.width - AsciiKarte.width()*2-2, 1)
         if self.navigation_ablage:
             self.screen.write_to_screen(
-                f"[{len(self.anlageStapel)}]", self.screen.width - AsciiKarte.width()*2-1, AsciiKarte.height()+2)
+                f"[{len(self.anlageStapel)+1}]", self.screen.width - AsciiKarte.width()*2-1, AsciiKarte.height()+2)
         self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
                                     self.screen.width - AsciiKarte.width()-2, 1)
 
@@ -157,7 +157,7 @@ class Solitair(object):
                 a.printFanned(), AsciiKarte.width()*idx+2, AsciiKarte.height()+5)
             if self.navigation_anlage:
                 self.screen.write_to_screen(
-                    f"[{idx}]", AsciiKarte.width()*idx+3, AsciiKarte.height()+4)
+                    f"[{idx+1}]", AsciiKarte.width()*idx+3, AsciiKarte.height()+4)
 
         self.screen.write_to_screen(
             self._menue(), 0, AsciiKarte.height()*2 + 30)
@@ -173,6 +173,7 @@ class Solitair(object):
     def _zeichne_dateiauswahl(self, speicherDir: Path, laden: bool = False) -> Path:
         sicherungsDateien = [f for f in speicherDir.glob(
             "*.save.json") if f.is_file()]
+        sicherungsDateien.sort()
         dateien = []
         for i in range(0, 10):
             if i < len(sicherungsDateien):
@@ -391,9 +392,13 @@ class Solitair(object):
             * wenn ja dann wird die Karte auf dem entsprechenden Ablagestapel abgelegt
         """
         self._zeige_navihilfe(withAblage=True)
-        idx = self._lese_nummer(
-            "Welchen Stapel möchten sie ablegen? ", range(0, len(self.anlageStapel)+1))
+        auswahl = self._lese_nummer(
+            "Welchen Stapel möchten sie ablegen? (Drücke 0 zum abbrechen) ", range(0, len(self.anlageStapel)+1))
         self._verstecke_navihilfe()
+        if auswahl == 0:
+            return
+
+        idx = auswahl-1
         if idx < len(self.anlageStapel):
             stapel = self.anlageStapel[idx].stapel
         elif idx == len(self.anlageStapel):
@@ -427,9 +432,12 @@ class Solitair(object):
         k = self.ablageStapel.top()
         if k:
             self._zeige_navihilfe(withAblage=False)
-            idx = self._lese_nummer(f"Wo möchten sie die Karte {k.farbe.blatt} {k.typ.blatt} anlegen? ",
-                                    range(0, len(self.anlageStapel)))
+            auswahl = self._lese_nummer(f"Wo möchten sie die Karte {k.farbe.blatt} {k.typ.blatt} anlegen? (Drücke 0 zum abbrechen) ",
+                                    range(0, len(self.anlageStapel)+1))
             self._verstecke_navihilfe()
+            if auswahl == 0:
+                return
+            idx = auswahl-1
             stapel = self.anlageStapel[idx].stapel
 
             if stapel.anlegbar(k):
@@ -438,7 +446,7 @@ class Solitair(object):
                 LOG.info(f"Karte {str(k)} an Stapel {str(stapel)} angelegt!")
             else:
                 self._schreibe_status(
-                    f"Karte {k.farbe.blatt} {k.typ.blatt} kann nicht an Stapel [{idx}] angelegt werden!")
+                    f"Karte {str(k())} kann nicht an Stapel [{auswahl}] {str(stapel.top())} angelegt werden!")
 
     def _verschieben(self):
         """
@@ -452,13 +460,23 @@ class Solitair(object):
             * wenn nicht dann wird eine Fehlermeldung angezeigt und der Vorgang wird abgebrochen
         """
         self._zeige_navihilfe(withAblage=False)
-        von = self._lese_nummer(f"Von welchem Stapel wollen sie Karten verschieben? ",
-                                range(0, len(self.anlageStapel)))
+        auswahlVon = self._lese_nummer(f"Von welchem Stapel wollen sie Karten verschieben? (Drücke 0 zum abbrechen) ",
+                                       range(0, len(self.anlageStapel)+1))
+        if auswahlVon == 0:
+            self._verstecke_navihilfe()
+            return
+
+        von = auswahlVon-1
         vonStapel = self.anlageStapel[von].stapel
         self._schreibe_status(f"Verschieben von Stapel {von}")
         self._zeichnen()
-        zu = self._lese_nummer(f"Zu welchem Stapel wollen sie die Karten verschieben? ",
-                               range(0, len(self.anlageStapel)))
+        auswahlZu = self._lese_nummer(f"Zu welchem Stapel wollen sie die Karten verschieben? (Drücke 0 zum abbrechen) ",
+                                      range(0, len(self.anlageStapel)+1))
+        if auswahlZu == 0:
+            self._verstecke_navihilfe()
+            return
+
+        zu = auswahlZu-1
         zuStapel = self.anlageStapel[zu].stapel
         self._verstecke_navihilfe()
         if vonStapel.verschieben_nach(zuStapel):
@@ -467,7 +485,7 @@ class Solitair(object):
                 f"Karten von Stapel {str(vonStapel)} zu {str(zuStapel)} verschoben!")
         else:
             self._schreibe_status(
-                f"Verschieben von Stapel {von} auf Stapel {zu} nicht möglich!")
+                f"Verschieben von Stapel {auswahlVon} auf Stapel {auswahlZu} ({str(zuStapel.top())}) nicht möglich!")
 
     def _neu_mischen(self):
         """
