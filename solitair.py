@@ -547,15 +547,14 @@ class Solitair(object):
         else:
             delta_x = 0
 
-        for i in range(0, steps-1):
-            x += delta_x
-            y += delta_y
-
+        for i in range(0, steps):
             self.screen.clear_screen()
             self._zeichnen()
             self.screen.write_to_screen(AsciiKarte.print(karte), x, y)
             self.screen.print()
             sleep(0.2)
+            x += delta_x
+            y += delta_y
 
     def _auto_anlegen(self):
         for start_idx, s in enumerate(self.anlageStapel):
@@ -564,7 +563,8 @@ class Solitair(object):
                 for stop_idx, a in enumerate(self.ablagen):
                     if a.anlegbar(k):
                         kt = s.stapel.ziehen()
-                        self._auto_karte_zeichnen(kt, start_idx, stop_idx, s.stapel.karten_anzahl())
+                        self._auto_karte_zeichnen(
+                            kt, start_idx, stop_idx, s.stapel.karten_anzahl())
                         a.anlegen(kt)
                         self._punkte_hinzufügen(10)
                         self.screen.clear_screen()
