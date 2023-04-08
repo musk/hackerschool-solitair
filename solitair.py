@@ -186,7 +186,7 @@ class Solitair(object):
                 r"^solitair-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2}).save.json$", path.name if path != "" else "")
             if match:
                 (jahr, monat, tag, stunde, minute, sekunde) = match.groups()
-                dateiListe += f"│ {idx:>2}: {jahr}.{monat}.{tag} {stunde}:{minute}:{sekunde}\n│     {path.name}    │\n"
+                dateiListe += f"| {idx:>2}: {jahr}.{monat}.{tag} {stunde}:{minute}:{sekunde}                   |\n│     {path.name}    │\n"
             elif laden:
                 dateiListe += f"│                                           │\n│                                           │\n"
             else:
