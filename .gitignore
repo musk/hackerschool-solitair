@@ -133,3 +133,4 @@ dmypy.json
 .vscode/
 .idea/
 *.save.json
+solitair.log*

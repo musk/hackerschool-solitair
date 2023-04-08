@@ -10,10 +10,12 @@
         "file": {
             "level": "DEBUG",
             "formatter": "standard",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "mode": "a",
             "filename": "solitair.log",
-            "encoding": "utf-8"
+            "encoding": "utf-8",
+            "backupCount": 2,
+            "maxBytes": 100000 
         }
     },
     "loggers": {
