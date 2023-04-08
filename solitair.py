@@ -393,7 +393,7 @@ class Solitair(object):
         """
         self._zeige_navihilfe(withAblage=True)
         auswahl = self._lese_nummer(
-            "Welchen Stapel möchten sie ablegen? (Drücke 0 zum abbrechen) ", range(0, len(self.anlageStapel)+1))
+            "Welchen Stapel möchten sie ablegen? (Drücke 0 zum abbrechen) ", range(0, len(self.anlageStapel)+2))
         self._verstecke_navihilfe()
         if auswahl == 0:
             return
