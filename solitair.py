@@ -532,7 +532,7 @@ class Solitair(object):
 
     def _auto_karte_zeichnen(self, karte: Karte, start_idx: int, stop_idx: int, anzahl_karten: int):
         x = AsciiKarte.width()*start_idx+2
-        y = AsciiKarte.height()+2*2*anzahl_karten
+        y = AsciiKarte.height()+2*anzahl_karten+6
         end_x = AsciiKarte.width()*stop_idx+2
         end_y = 1
 
