@@ -127,7 +127,7 @@ class AsciiStapel(object):
         Gibt den Stapel als str zurück in Form einer einzelne Karte. Die Methode zeichnet 
         die oberste Karte mittels `AsciiKarte.print(karte)`.
         """
-        return karte(self.stapel.top())
+        return str_karte(self.stapel.top())
 
     def printFanned(self) -> str:
         """
