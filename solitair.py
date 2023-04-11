@@ -1,6 +1,6 @@
 from time import sleep
 from cards import Karte, Stapel, AnlageStapel, AblageStapel, Farbe, KartenTyp
-from ascii import AsciiScreen, AsciiKarte, AsciiStapel
+from ascii import AsciiScreen, AsciiStapel, karten_breite, karten_hoehe, str_karte
 from collections import deque
 import logging
 import re
@@ -63,7 +63,7 @@ class Solitair(object):
                         AblageStapel(farbe=Farbe.KARO),
                         AblageStapel(farbe=Farbe.KREUZ),
                         AblageStapel(farbe=Farbe.PIK)]
-        self.screen = AsciiScreen(width=74, height=AsciiKarte.height()*2 + 33)
+        self.screen = AsciiScreen(width=74, height=karten_hoehe()*2 + 31)
         self.navigation = False
         self.navigation_anlage = False
         self.navigation_ablage = False
@@ -141,28 +141,28 @@ class Solitair(object):
         self.screen.write_to_screen(
             score_txt, self.screen.width - len(score_txt) - 3)
         for idx, a in enumerate(self.ablagen):
-            self.screen.write_to_screen(AsciiKarte.print(a.top()),
-                                        AsciiKarte.width()*idx+2, 1)
+            self.screen.write_to_screen(str_karte(a.top()),
+                                        karten_breite()*idx+2, 1)
 
-        self.screen.write_to_screen(AsciiKarte.print(self.ablageStapel.top()),
-                                    self.screen.width - AsciiKarte.width()*2-2, 1)
+        self.screen.write_to_screen(str_karte(self.ablageStapel.top()),
+                                    self.screen.width - karten_breite()*2-2, 1)
         if self.navigation_ablage:
             self.screen.write_to_screen(
-                f"[{len(self.anlageStapel)+1}]", self.screen.width - AsciiKarte.width()*2-1, AsciiKarte.height()+2)
-        self.screen.write_to_screen(AsciiKarte.print(self.ziehStapel.top()),
-                                    self.screen.width - AsciiKarte.width()-2, 1)
+                f"[{len(self.anlageStapel)+1}]", self.screen.width - karten_breite()*2-1, karten_hoehe()+1)
+        self.screen.write_to_screen(str_karte(self.ziehStapel.top()),
+                                    self.screen.width - karten_breite()-2, 1)
 
         for idx, a in enumerate(self.anlageStapel):
             self.screen.write_to_screen(
-                a.printFanned(), AsciiKarte.width()*idx+2, AsciiKarte.height()+5)
+                a.printFanned(), karten_breite()*idx+2, karten_hoehe()+4)
             if self.navigation_anlage:
                 self.screen.write_to_screen(
-                    f"[{idx+1}]", AsciiKarte.width()*idx+3, AsciiKarte.height()+4)
+                    f"[{idx+1}]", karten_breite()*idx+3, karten_hoehe()+3)
 
         self.screen.write_to_screen(
-            self._menue(), 0, AsciiKarte.height()*2 + 30)
+            self._menue(), 0, karten_hoehe()*2 + 28)
         self.screen.write_to_screen(
-            self.status_msg, 2, AsciiKarte.height()*2 + 28)
+            self.status_msg, 2, karten_hoehe()*2 + 26)
 
         if self.datei_liste:
             self.screen.write_to_screen(self.datei_liste, int(
@@ -549,9 +549,9 @@ class Solitair(object):
         return all([a.komplett() for a in self.ablagen])
 
     def _auto_karte_zeichnen(self, karte: Karte, start_idx: int, stop_idx: int, anzahl_karten: int):
-        x = AsciiKarte.width()*start_idx+2
-        y = AsciiKarte.height()+2*anzahl_karten+6
-        end_x = AsciiKarte.width()*stop_idx+2
+        x = karten_breite()*start_idx+2
+        y = karten_hoehe()+2*anzahl_karten+6
+        end_x = karten_breite()*stop_idx+2
         end_y = 1
 
         steps = 3
@@ -568,7 +568,7 @@ class Solitair(object):
         for i in range(0, steps):
             self.screen.clear_screen()
             self._zeichnen()
-            self.screen.write_to_screen(AsciiKarte.print(karte), x, y)
+            self.screen.write_to_screen(str_karte(karte), x, y)
             self.screen.print()
             sleep(0.2)
             x += delta_x

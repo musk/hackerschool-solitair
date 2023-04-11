@@ -106,7 +106,7 @@ class AsciiStapel(object):
         """
         Gibt die Breite des Stapels als `int` zurück.
         """
-        return AsciiKarte.width()
+        return karten_breite()
 
     def height(self, fanned: bool = True) -> int:
         """
@@ -118,16 +118,16 @@ class AsciiStapel(object):
                  `False` wenn nicht.
         """
         if fanned:
-            return len(self.stapel.karten)-1 * 2 + AsciiKarte.height()
+            return len(self.stapel.karten)-1 * 2 + karten_hoehe()
         else:
-            return AsciiKarte.height()
+            return karten_hoehe()
 
     def print(self) -> str:
         """
         Gibt den Stapel als str zurück in Form einer einzelne Karte. Die Methode zeichnet 
         die oberste Karte mittels `AsciiKarte.print(karte)`.
         """
-        return AsciiKarte.print(self.stapel.top())
+        return karte(self.stapel.top())
 
     def printFanned(self) -> str:
         """
@@ -138,104 +138,93 @@ class AsciiStapel(object):
         Ist die Karte verdeckt wird `AsciiKarte.back()` aufgerufen für aufgedeckte Karten wird `AsciiKarte.front()` 
         aufgerufen.
         """
-        card_top = AsciiKarte.back().splitlines(keepends=True)[0]
+        card_top = rueckseite().splitlines(keepends=True)[0]
         result = ""
         hidden = [k for k in self.stapel.karten if not k.aufgedeckt()]
         shown = [k for k in self.stapel.karten if k.aufgedeckt()]
 
         if len(hidden) == 0 and len(shown) == 0:
-            return AsciiKarte.empty()
+            return leer()
 
         for k in enumerate(hidden):
             result += card_top
 
         for idx, k in enumerate(shown):
             if idx < len(shown)-1:
-                result += "".join(AsciiKarte.front(
+                result += "".join(vorderseite(
                     k).splitlines(keepends=True)[:2])
             else:
-                result += AsciiKarte.front(k)
+                result += vorderseite(k)
         return result
 
 
-class AsciiKarte(object):
+def karten_breite():
     """
-    Die Klasse definiert statische Methoden für die Darstellung von einzelnen Karten 
-    auf einem Terminal.
+    Gibt die Breite einer Karte als int zurück
     """
-    @classmethod
-    def width(cls) -> int:
-        """
-        Gibt die Breite einer Karte als int zurück
-        """
-        return 10
+    return 10
 
-    @classmethod
-    def height(cls) -> int:
-        """
-        Gibt die Höhe einer Karte als int zurück
-        """
-        return 5
+def karten_hoehe():
+    """
+    Gibt die Höhe einer Karte als int zurück
+    """
+    return 6
 
-    @classmethod
-    def print(cls, karte: Karte) -> str:
-        """
-        Gibt die Karte `karte` als `str` zurück. Wenn die Karte
-        aufgedeckt ist wird `self.front(karte)` aufgerufen ansonsten 
-        wird `self.back()` aufgerufen.
-        
-        karte - Karte die darzustellende Karte
-        """
-        blatt = ""
-        if karte is None:
-            blatt = cls.empty()
-        elif karte.aufgedeckt():
-            blatt = cls.front(karte)
-        else:
-            blatt = cls.back()
-        return blatt
-
-    @classmethod
-    def front(cls, karte: Karte) -> str:
-        """
-        Gibt Vorderseite der Karte `karte` als `str` zurück.
-        
-        karte - Karte die darzustellende Karte
-        """
-        typ = karte.typ.blatt
-        farbe = karte.farbe.blatt
-        return """┌────────┐
+def vorderseite(karte: Karte) -> str:
+    """
+    Gibt Vorderseite der Karte `karte` als `str` zurück.
+    
+    karte - Karte die darzustellende Karte
+    """
+    typ = karte.typ.blatt
+    farbe = karte.farbe.blatt
+    return """┌────────┐
 │ {0:<2s}   {1} │
 │        │
 │        │
 │ {1}   {0:>2s} │
 └────────┘""".format(typ, farbe)
 
-    @classmethod
-    def back(cls) -> str:
-        """
-        Gibt die Rückseite einer Karte als `str` zurück.
-        """
-        return """┌────────┐
+def rueckseite() -> str:
+    """
+    Gibt die Rückseite einer Karte als `str` zurück.
+    """
+    return """┌────────┐
 │\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588│
 │\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588│
 │\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588│
 │\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588│
 └────────┘
-"""
+"""    
 
-    @classmethod
-    def empty(cls) -> str:
-        """
-        Gibt die Darstellung eines leeren Stapels zurück.
-        """
-        return """┌────────┐
+def leer() -> str:
+    """
+    Gibt die Darstellung eines leeren Stapels zurück.
+    """
+    return """┌────────┐
 │        │
 │   \/   │
 │   /\   │
 │        │
 └────────┘
-"""
+"""        
+    
+def str_karte(karte: Karte) -> str:
+    """
+    Gibt die Karte `karte` als `str` zurück. Wenn die Karte
+    aufgedeckt ist wird `self.front(karte)` aufgerufen ansonsten 
+    wird `self.back()` aufgerufen.
+    
+    karte - Karte die darzustellende Karte
+    """
+    blatt = ""
+    if karte is None:
+        blatt = leer()
+    elif karte.aufgedeckt():
+        blatt = vorderseite(karte)
+    else:
+        blatt = rueckseite()
+    return blatt
 
 
 if __name__ == "__main__":
