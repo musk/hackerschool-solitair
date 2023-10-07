@@ -274,7 +274,7 @@ class Solitair(object):
 
     def _verstecke_navihilfe(self):
         """
-        Setzt das Navigationsflag auf False so dass die Eingabehilfe beim naächen screen.print() nicht mehr angezeigt wird.
+        Setzt das Navigationsflag auf False so dass die Eingabehilfe beim nächsten screen.print() nicht mehr angezeigt wird.
         """
         self.navigation_anlage = False
         self.navigation_ablage = False
@@ -385,10 +385,10 @@ class Solitair(object):
         """
         Die Methode wird aufgerufen wenn der ablegen Menüpunkt ausgewählt wird.
         Die Method
-        * zeigt zunächst das Navigationshilemenü
+        * zeigt zunächst das Navigationshilfemenü
         * dann fragt es nach dem Stapel von dem die Karte genommen werden soll
         * dann wird überprüft ob die Karte tatsächlich abgelegt werden kann
-            * wenn nein dann wird eine Fehlernachricht angezeigt und der Vorgan abgebrochen
+            * wenn nein dann wird eine Fehlernachricht angezeigt und der Vorgang abgebrochen
             * wenn ja dann wird die Karte auf dem entsprechenden Ablagestapel abgelegt
         """
         self._zeige_navihilfe(withAblage=True)
@@ -446,7 +446,7 @@ class Solitair(object):
                 LOG.info(f"Karte {str(k)} an Stapel {str(stapel)} angelegt!")
             else:
                 self._schreibe_status(
-                    f"Karte {str(k())} kann nicht an Stapel [{auswahl}] {str(stapel.top())} angelegt werden!")
+                    f"Karte {str(k)} kann nicht an Stapel [{auswahl}] {str(stapel.top())} angelegt werden!")
 
     def _verschieben(self):
         """
